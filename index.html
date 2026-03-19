@@ -1,0 +1,147 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consulta de Óleo Automotivo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #222;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .container {
+      max-width: 800px;
+      margin: 30px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body><header>
+  <h1>Consulta de Óleo Automotivo</h1>
+</header><div class="container">
+  <label>Marca:</label>
+  <select id="marca" onchange="carregarModelos()">
+    <option value="">Selecione</option>
+  </select><label>Modelo:</label> <select id="modelo" onchange="carregarMotores()"> <option value="">Selecione</option> </select>
+
+<label>Motor:</label> <select id="motor"> <option value="">Selecione</option> </select>
+
+<button onclick="buscarInfo()">Consultar</button>
+
+  <div class="result" id="resultado"></div>
+</div><script>
+const banco = {
+  "Fiat": {
+    "Uno": {
+      "1.0": {
+        oleo: "5W-30",
+        quantidade: "3,5L",
+        filtro: "Filtro padrão Fiat"
+      }
+    }
+  },
+  "Volkswagen": {
+    "Gol": {
+      "1.6": {
+        oleo: "5W-40",
+        quantidade: "4L",
+        filtro: "Filtro VW"
+      }
+    }
+  }
+};
+
+function carregarMarcas() {
+  const marcaSelect = document.getElementById('marca');
+  for (let marca in banco) {
+    let option = document.createElement('option');
+    option.value = marca;
+    option.textContent = marca;
+    marcaSelect.appendChild(option);
+  }
+}
+
+function carregarModelos() {
+  const marca = document.getElementById('marca').value;
+  const modeloSelect = document.getElementById('modelo');
+  modeloSelect.innerHTML = '<option value="">Selecione</option>';
+
+  if (marca && banco[marca]) {
+    for (let modelo in banco[marca]) {
+      let option = document.createElement('option');
+      option.value = modelo;
+      option.textContent = modelo;
+      modeloSelect.appendChild(option);
+    }
+  }
+}
+
+function carregarMotores() {
+  const marca = document.getElementById('marca').value;
+  const modelo = document.getElementById('modelo').value;
+  const motorSelect = document.getElementById('motor');
+  motorSelect.innerHTML = '<option value="">Selecione</option>';
+
+  if (marca && modelo && banco[marca][modelo]) {
+    for (let motor in banco[marca][modelo]) {
+      let option = document.createElement('option');
+      option.value = motor;
+      option.textContent = motor;
+      motorSelect.appendChild(option);
+    }
+  }
+}
+
+function buscarInfo() {
+  const marca = document.getElementById('marca').value;
+  const modelo = document.getElementById('modelo').value;
+  const motor = document.getElementById('motor').value;
+  const resultado = document.getElementById('resultado');
+
+  if (marca && modelo && motor) {
+    const info = banco[marca][modelo][motor];
+    resultado.innerHTML = `
+      <strong>Óleo:</strong> ${info.oleo}<br>
+      <strong>Quantidade:</strong> ${info.quantidade}<br>
+      <strong>Filtro:</strong> ${info.filtro}
+    `;
+  } else {
+    resultado.innerHTML = "Selecione todas as opções";
+  }
+}
+
+carregarMarcas();
+</script></body>
+</html>
