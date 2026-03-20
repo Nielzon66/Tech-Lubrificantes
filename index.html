@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta Veicular Avançada</title>
+<title>Busca Veicular Ultra Rápida</title>
 
 <style>
 body { font-family: Arial; background:#f4f4f4; }
 .container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
 input, select, button { width:100%; padding:10px; margin:8px 0; }
-.suggestions { position:absolute; background:#fff; border:1px solid #ccc; display:none; max-height:200px; overflow:auto; }
-.suggestion-item { padding:5px; cursor:pointer; }
-.suggestion-item:hover { background:#007bff; color:#fff; }
 .relative { position:relative; }
+.suggestions { position:absolute; background:#fff; border:1px solid #ccc; max-height:200px; overflow:auto; width:100%; display:none; }
+.suggestion-item { padding:6px; cursor:pointer; }
+.suggestion-item:hover { background:#007bff; color:#fff; }
 </style>
 </head>
 
@@ -22,60 +22,43 @@ input, select, button { width:100%; padding:10px; margin:8px 0; }
 
 <select id="tipoVeiculo">
   <option value="carros">Carros</option>
-  <option value="motos">Motos</option>
 </select>
 
 <select id="marca"></select>
 
 <div class="relative">
-<input id="modelo" placeholder="Digite modelo">
+<input id="modelo" placeholder="Digite modelo (ex: gol, civic)">
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
-<select id="motor">
-  <option value="">Motor</option>
-  <option>1.0</option>
-  <option>1.6</option>
-</select>
+<select id="ano"></select>
 
-<div id="anoContainer">
-<select id="ano" disabled></select>
-</div>
-
-<button id="btnBuscar" disabled>Consultar</button>
+<button id="btnBuscar">Consultar</button>
 
 </div>
 
 <script>
-let modelosData = {};
-let marcasData = {};
+// 🔥 LISTA LOCAL (ULTRA RÁPIDO)
+const modelosFixos = [
+  {nome:"Gol", codigo:"gol"},
+  {nome:"Voyage", codigo:"voyage"},
+  {nome:"Civic", codigo:"civic"},
+  {nome:"Corolla", codigo:"corolla"},
+  {nome:"Hilux", codigo:"hilux"},
+  {nome:"Onix", codigo:"onix"},
+  {nome:"HB20", codigo:"hb20"},
+  {nome:"Strada", codigo:"strada"},
+  {nome:"Palio", codigo:"palio"},
+  {nome:"Uno", codigo:"uno"}
+];
 
-async function carregarMarcas() {
-  const tipo = tipoVeiculo.value;
-  const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas`);
-  const data = await res.json();
+// 🔥 BUSCA INSTANTÂNEA
+modelo.oninput = () => {
+  const termo = modelo.value.toLowerCase();
 
-  marca.innerHTML = '<option value="">Marca</option>';
-
-  data.forEach(m => {
-    marca.add(new Option(m.nome, m.codigo));
-    marcasData[m.codigo] = m.nome;
-  });
-}
-
-modelo.oninput = async () => {
-  if (!marca.value) return;
-
-  const tipo = tipoVeiculo.value;
-
-  if (!modelosData[marca.value]) {
-    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca.value}/modelos`);
-    const data = await res.json();
-    modelosData[marca.value] = data.modelos;
-  }
-
-  const lista = modelosData[marca.value]
-    .filter(m => m.nome.toLowerCase().includes(modelo.value.toLowerCase()));
+  const lista = modelosFixos.filter(m =>
+    m.nome.toLowerCase().includes(termo)
+  );
 
   sugestoes.innerHTML = '';
 
@@ -84,33 +67,17 @@ modelo.oninput = async () => {
     div.className = 'suggestion-item';
     div.innerText = m.nome;
 
-    div.onclick = async () => {
+    div.onclick = () => {
       modelo.value = m.nome;
       sugestoes.style.display = 'none';
 
-      const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca.value}/${m.codigo}/anos`);
-      const anos = await res.json();
-
-      console.log("ANOS:", anos); // DEBUG
-
-      // 🔥 recria o select inteiro (resolve bug)
-      const container = document.getElementById('anoContainer');
-      container.innerHTML = '<select id="ano"></select>';
-
-      const novoSelect = document.getElementById('ano');
-
-      anos.forEach(a => {
-        novoSelect.add(new Option(a.nome, a.codigo));
-      });
-
-      // 🔥 força seleção real
-      if (anos.length > 0) {
-        novoSelect.selectedIndex = 0;
-      }
-
-      novoSelect.onchange = checar;
-
-      checar();
+      // 🔥 ANOS MOCK (instantâneo)
+      ano.innerHTML = `
+        <option>2024</option>
+        <option>2023</option>
+        <option>2022</option>
+        <option>2021</option>
+      `;
     };
 
     sugestoes.appendChild(div);
@@ -119,36 +86,14 @@ modelo.oninput = async () => {
   sugestoes.style.display = lista.length ? 'block' : 'none';
 };
 
-function checar() {
-  const ano = document.getElementById('ano');
+// 🔥 MARCAS SIMPLES
+marca.innerHTML = `
+<option>Volkswagen</option>
+<option>Honda</option>
+<option>Toyota</option>
+<option>Fiat</option>
+`;
 
-  btnBuscar.disabled = !(
-    marca.value &&
-    modelo.value &&
-    motor.value &&
-    ano && ano.value
-  );
-}
-
-motor.onchange = checar;
-
-btnBuscar.onclick = () => {
-  const ano = document.getElementById('ano');
-
-  alert(`OK:
-${marcasData[marca.value]}
-${modelo.value}
-${ano.value}`);
-};
-
-tipoVeiculo.onchange = carregarMarcas;
-
-marca.onchange = () => {
-  modelo.value = '';
-  document.getElementById('anoContainer').innerHTML = '<select id="ano" disabled></select>';
-};
-
-carregarMarcas();
 </script>
 
 </body>
