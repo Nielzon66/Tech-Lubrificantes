@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta Veicular Online - Otimizado</title>
+<title>Consulta Veicular Avançada</title>
 <style>
 body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:0; }
 header { background:#222; color:white; padding:15px; text-align:center; }
@@ -16,10 +16,12 @@ button:disabled { background:#999; cursor:not-allowed; }
 .suggestion-item { padding:5px; cursor:pointer; }
 .suggestion-item:hover, .suggestion-active { background:#007bff; color:white; }
 .relative { position:relative; }
+.filter-row { display:flex; gap:10px; flex-wrap:wrap; }
+.filter-row select { flex:1; }
 </style>
 </head>
 <body>
-<header><h1>Consulta Veicular Online - Otimizado</h1></header>
+<header><h1>Consulta Veicular Avançada</h1></header>
 
 <div class="container">
 <label>Marca:</label>
@@ -31,9 +33,12 @@ button:disabled { background:#999; cursor:not-allowed; }
 <div id="sugestoes" class="suggestions" style="display:none;"></div>
 </div>
 
+<div class="filter-row">
+<div>
 <label>Ano:</label>
 <select id="ano" disabled></select>
-
+</div>
+<div>
 <label>Motor:</label>
 <select id="motor" disabled>
   <option value="">Selecione o motor...</option>
@@ -46,9 +51,10 @@ button:disabled { background:#999; cursor:not-allowed; }
   <option value="3.2">3.2</option>
   <option value="Turbo">Turbo</option>
 </select>
+</div>
+</div>
 
 <button id="btnBuscar" onclick="buscarInfo()" disabled>Consultar Especificações</button>
-
 <div class="result" id="resultado"></div>
 </div>
 
@@ -57,7 +63,7 @@ const apiBase = 'https://brasilapi.com.br/api/fipe/carros';
 const filtrosMarcas = ['Tecfil','Wega','Fram'];
 
 let marcasData = {};
-let modelosData = {}; // marcaCodigo -> lista de modelos
+let modelosData = {}; // marcaCodigo -> lista de modelos já carregados
 
 // Carregar marcas
 async function carregarMarcas() {
@@ -77,13 +83,15 @@ async function carregarMarcas() {
   }
 }
 
-// Autocomplete de modelos com destaque
+// Autocomplete avançado
 const modeloInput = document.getElementById('modelo');
 const sugestoesBox = document.getElementById('sugestoes');
 
 modeloInput.addEventListener('input', async () => {
   const marcaCodigo = document.getElementById('marca').value;
   if(!marcaCodigo) return;
+
+  // Carrega modelos só uma vez por marca
   if(!modelosData[marcaCodigo]) {
     try {
       const res = await fetch(`${apiBase}/marcas/${marcaCodigo}/modelos`);
@@ -93,17 +101,20 @@ modeloInput.addEventListener('input', async () => {
   }
 
   const termo = modeloInput.value.toLowerCase();
-  const modelos = modelosData[marcaCodigo].filter(m => m.nome.toLowerCase().includes(termo));
+  const modelos = modelosData[marcaCodigo]
+      .filter(m => m.nome.toLowerCase().includes(termo))
+      .slice(0, 20); // limita sugestões para performance
+
   sugestoesBox.innerHTML = '';
   if(modelos.length && termo.length>0){
-    modelos.forEach((m, i) => {
+    modelos.forEach(m=>{
       const div = document.createElement('div');
       div.classList.add('suggestion-item');
-      div.innerHTML = m.nome.replace(new RegExp(termo, 'gi'), match => `<strong>${match}</strong>`);
-      div.addEventListener('click', () => {
+      div.innerHTML = m.nome.replace(new RegExp(termo,'gi'), match=>`<strong>${match}</strong>`);
+      div.addEventListener('click', ()=>{
         modeloInput.value = m.nome;
         carregarAnos(marcaCodigo, m.codigo);
-        sugestoesBox.style.display = 'none';
+        sugestoesBox.style.display='none';
       });
       sugestoesBox.appendChild(div);
     });
@@ -119,24 +130,26 @@ async function carregarAnos(marcaCodigo, modeloCodigo){
     const res = await fetch(`${apiBase}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos`);
     const anos = await res.json();
     selAno.innerHTML = '<option value="">Selecione o ano...</option>';
-    anos.forEach(a => selAno.appendChild(new Option(a.nome, a.codigo)));
+    anos.forEach(a=>selAno.appendChild(new Option(a.nome,a.codigo)));
     selAno.disabled=false;
-  } catch(e) {
+  } catch(e){
     selAno.innerHTML = '<option value="">Erro ao carregar anos</option>';
     console.error(e);
   }
 }
 
 // Habilitar botão
-document.getElementById('motor').addEventListener('change', () => {
+function checarPronto(){
   const motor = document.getElementById('motor').value;
   const ano = document.getElementById('ano').value;
   const modelo = modeloInput.value;
   const marca = document.getElementById('marca').value;
   document.getElementById('btnBuscar').disabled = !(motor && ano && modelo && marca);
-});
+}
+document.getElementById('motor').addEventListener('change', checarPronto);
+document.getElementById('ano').addEventListener('change', checarPronto);
 
-// Buscar informações e mostrar filtros completos
+// Buscar info
 async function buscarInfo(){
   const marcaCodigo = document.getElementById('marca').value;
   const marcaNome = marcasData[marcaCodigo];
@@ -161,7 +174,7 @@ async function buscarInfo(){
   document.getElementById('resultado').innerText = resultado;
 }
 
-// Evento marca reset
+// Resetar campos ao trocar marca
 document.getElementById('marca').addEventListener('change', ()=>{
   modeloInput.value='';
   document.getElementById('ano').innerHTML='<option value="">---</option>';
@@ -170,7 +183,6 @@ document.getElementById('marca').addEventListener('change', ()=>{
   document.getElementById('btnBuscar').disabled=true;
 });
 
-// Inicializa
 carregarMarcas();
 </script>
 </body>
