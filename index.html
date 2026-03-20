@@ -47,61 +47,67 @@ input, select { width:100%; padding:10px; margin:8px 0; }
 </div>
 
 <script>
+
+// 🔥 PEGAR ELEMENTOS CORRETAMENTE
+const tipoEl = document.getElementById('tipo');
+const marcaEl = document.getElementById('marca');
+const modeloEl = document.getElementById('modelo');
+const sugestoesEl = document.getElementById('sugestoes');
+const anoEl = document.getElementById('ano');
+
 let modelos = [];
 
 // 🔥 CARREGAR MARCAS
 async function carregarMarcas() {
-  const tipo = tipo.value;
-  marca.innerHTML = '<option>Carregando...</option>';
+  marcaEl.innerHTML = '<option>Carregando...</option>';
 
   try {
-    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas`);
+    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipoEl.value}/marcas`);
     const data = await res.json();
 
-    marca.innerHTML = '<option value="">Selecione</option>';
+    marcaEl.innerHTML = '<option value="">Selecione</option>';
 
     data.forEach(m => {
-      marca.add(new Option(m.nome, m.codigo));
+      marcaEl.add(new Option(m.nome, m.codigo));
     });
 
   } catch (e) {
-    marca.innerHTML = '<option>Erro</option>';
+    console.error(e);
+    marcaEl.innerHTML = '<option>Erro ao carregar</option>';
   }
 }
 
-// 🔥 AO ESCOLHER MARCA
-marca.onchange = async () => {
-  modelo.disabled = true;
-  modelo.value = '';
-  ano.innerHTML = '';
-  ano.disabled = true;
+// 🔥 QUANDO ESCOLHE MARCA
+marcaEl.addEventListener('change', async () => {
+  modeloEl.disabled = true;
+  modeloEl.value = '';
+  anoEl.innerHTML = '';
+  anoEl.disabled = true;
 
-  if (!marca.value) return;
-
-  const tipo = tipoVeiculo.value || tipo.value;
+  if (!marcaEl.value) return;
 
   try {
-    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca.value}/modelos`);
+    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipoEl.value}/${marcaEl.value}/modelos`);
     const data = await res.json();
 
     modelos = data.modelos || [];
 
-    modelo.disabled = false;
+    modeloEl.disabled = false;
 
   } catch (e) {
     console.error(e);
   }
-};
+});
 
-// 🔥 AUTOCOMPLETE CORRETO
-modelo.oninput = () => {
-  const termo = modelo.value.toLowerCase();
+// 🔥 AUTOCOMPLETE
+modeloEl.addEventListener('input', () => {
+  const termo = modeloEl.value.toLowerCase();
 
   const lista = modelos.filter(m =>
     m.nome.toLowerCase().includes(termo)
   );
 
-  sugestoes.innerHTML = '';
+  sugestoesEl.innerHTML = '';
 
   lista.slice(0, 20).forEach(m => {
     const div = document.createElement('div');
@@ -109,43 +115,47 @@ modelo.oninput = () => {
     div.innerText = m.nome;
 
     div.onclick = async () => {
-      modelo.value = m.nome;
-      sugestoes.style.display = 'none';
+      modeloEl.value = m.nome;
+      sugestoesEl.style.display = 'none';
 
-      ano.innerHTML = '<option>Carregando...</option>';
-      ano.disabled = true;
+      anoEl.innerHTML = '<option>Carregando...</option>';
+      anoEl.disabled = true;
 
-      const tipo = document.getElementById('tipo').value;
+      try {
+        const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipoEl.value}/${marcaEl.value}/${m.codigo}/anos`);
+        const anos = await res.json();
 
-      const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca.value}/${m.codigo}/anos`);
-      const anos = await res.json();
+        anoEl.innerHTML = '<option value="">Selecione</option>';
 
-      ano.innerHTML = '<option value="">Selecione</option>';
+        anos.forEach(a => {
+          anoEl.add(new Option(a.nome, a.codigo));
+        });
 
-      anos.forEach(a => {
-        ano.add(new Option(a.nome, a.codigo));
-      });
+        anoEl.disabled = false;
 
-      ano.disabled = false;
+      } catch (e) {
+        console.error(e);
+      }
     };
 
-    sugestoes.appendChild(div);
+    sugestoesEl.appendChild(div);
   });
 
-  sugestoes.style.display = lista.length ? 'block' : 'none';
-};
+  sugestoesEl.style.display = lista.length ? 'block' : 'none';
+});
 
 // 🔄 TROCAR TIPO
-tipo.onchange = () => {
-  modelo.value = '';
-  modelo.disabled = true;
-  ano.innerHTML = '';
-  ano.disabled = true;
+tipoEl.addEventListener('change', () => {
+  modeloEl.value = '';
+  modeloEl.disabled = true;
+  anoEl.innerHTML = '';
+  anoEl.disabled = true;
   carregarMarcas();
-};
+});
 
 // INICIAR
 carregarMarcas();
+
 </script>
 
 </body>
