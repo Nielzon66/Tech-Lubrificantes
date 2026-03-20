@@ -5,48 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consulta de Óleo Automotivo</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #222;
-      color: white;
-      padding: 15px;
-      text-align: center;
-    }
-    .container {
-      max-width: 800px;
-      margin: 30px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .result {
-      margin-top: 20px;
-      padding: 15px;
-      background: #e9ecef;
-      border-radius: 8px;
-    }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    header { background: #222; color: white; padding: 15px; text-align: center; }
+    .container { max-width: 800px; margin: 30px auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    button { background: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    .result { margin-top: 20px; padding: 15px; background: #e9ecef; border-radius: 8px; }
   </style>
 </head>
 <body>
@@ -55,24 +20,16 @@
 </header>
 <div class="container">
   <label>Marca:</label>
-  <select id="marca" onchange="carregarModelos()">
-    <option value="">Selecione</option>
-  </select>
+  <select id="marca" onchange="carregarModelos()"><option value="">Selecione</option></select>
 
   <label>Modelo:</label>
-  <select id="modelo" onchange="carregarAnos()">
-    <option value="">Selecione</option>
-  </select>
+  <select id="modelo" onchange="carregarAnos()"><option value="">Selecione</option></select>
 
   <label>Ano:</label>
-  <select id="ano" onchange="carregarMotores()">
-    <option value="">Selecione</option>
-  </select>
+  <select id="ano" onchange="carregarMotores()"><option value="">Selecione</option></select>
 
   <label>Motor:</label>
-  <select id="motor">
-    <option value="">Selecione</option>
-  </select>
+  <select id="motor"><option value="">Selecione</option></select>
 
   <button onclick="buscarInfo()">Consultar</button>
 
@@ -81,65 +38,35 @@
 
 <script>
 const banco = {
+  "Chevrolet": {
+    "Onix": {
+      "2018": { "1.0": { oleo:"5W‑30 (API SP dexos1)", quantidade:"~4,0L", filtros:{oleo:"ACDelco PF52E / Mann W712/22", ar:"Fram CA11044", combustivel:"Tecfil GI58", cabine:"Tecfil ACP905"} } },
+      "2020": { "1.0 Turbo": { oleo:"5W‑30 (API SP dexos1 Gen3)", quantidade:"4,0L", filtros:{oleo:"ACDelco PF52E", ar:"Mann C 26 110/1", combustivel:"Mann WK 940/22", cabine:"Mann CU 2739"} } }
+    }
+  },
+  "Hyundai": {
+    "HB20": {
+      "2017": { "1.0": { oleo:"5W‑30 (API SL+)", quantidade:"3,3‑3,5L", filtros:{oleo:"Mann SP11063", ar:"Mann C 15164", combustivel:"Mann WK 820/3", cabine:"Mann CU 2739"} } },
+      "2019": { "1.6": { oleo:"5W‑30 (API SL+)", quantidade:"3,6‑3,8L", filtros:{oleo:"Mann SP11063", ar:"Fram CA10897", combustivel:"Tecfil GI44", cabine:"Tecfil ACP905"} } }
+    }
+  },
   "Volkswagen": {
     "Gol": {
-      "2015": {
-        "1.0": {
-          oleo: "5W-40",
-          quantidade: "3,5L",
-          filtros: {
-            oleo: "Tecfil PSL56 / Fram PH5317",
-            ar: "Tecfil ARL4147",
-            combustivel: "Tecfil GI12",
-            cabine: "Tecfil ACP902"
-          }
-        }
-      },
-      "2020": {
-        "1.6": {
-          oleo: "5W-40",
-          quantidade: "4L",
-          filtros: {
-            oleo: "Mann W712/22",
-            ar: "Tecfil ARL4150",
-            combustivel: "Tecfil GI44",
-            cabine: "Tecfil ACP905"
-          }
-        }
-      }
+      "2015": { "1.0": { oleo:"5W‑40 (API SN)", quantidade:"3,5‑3,8L", filtros:{oleo:"Tecfil PSL56 / Mann W712/22", ar:"Tecfil ARL4160", combustivel:"Tecfil GI12", cabine:"Tecfil ACP902"} } },
+      "2018": { "1.6": { oleo:"5W‑40 (API SN)", quantidade:"4,0‑4,2L", filtros:{oleo:"Mann W712/22", ar:"Fram CA11564", combustivel:"Tecfil GI44", cabine:"Fram CF11914"} } }
     }
   },
   "Fiat": {
-    "Uno": {
-      "2013": {
-        "1.0 Fire": {
-          oleo: "5W-30",
-          quantidade: "3,5L",
-          filtros: {
-            oleo: "Tecfil PSL55",
-            ar: "Tecfil ARL2208",
-            combustivel: "Tecfil GI10",
-            cabine: "Tecfil ACP100"
-          }
-        }
-      }
-    }
+    "Palio": {
+      "2014": { "1.0 Fire": { oleo:"5W‑30", quantidade:"3,3‑3,8L", filtros:{oleo:"Tecfil PSL55", ar:"Tecfil ARL2208", combustivel:"Tecfil GI10", cabine:"Tecfil ACP100"} } },
+      "2016": { "1.3 Fire": { oleo:"5W‑30", quantidade:"3,8‑4,0L", filtros:{oleo:"Fram PH6607", ar:"Fram CA11564", combustivel:"Mann WK 820/3", cabine:"Mann CU 2739"} } }
+    },
+    "Uno": { "2013": { "1.0": { oleo:"5W‑30 ou 15W‑40", quantidade:"3,0‑3,5L", filtros:{oleo:"Tecfil PSL55", ar:"Tecfil ARL2208", combustivel:"Tecfil GI10", cabine:"Tecfil ACP100"} } } },
+    "Argo": { "2019": { "1.3": { oleo:"5W‑30", quantidade:"3,5‑4,0L", filtros:{oleo:"Mann W 712/22", ar:"Mann C 27 110/1", combustivel:"Mann WK 820/3", cabine:"Mann CU 2739"} } } },
+    "Mobi": { "2020": { "1.0": { oleo:"5W‑30", quantidade:"3,3‑3,6L", filtros:{oleo:"Tecfil PSL55", ar:"Tecfil ARL2208", combustivel:"Tecfil GI10", cabine:"Tecfil ACP100"} } } }
   },
-  "Chevrolet": {
-    "Onix": {
-      "2019": {
-        "1.4": {
-          oleo: "5W-30",
-          quantidade: "4L",
-          filtros: {
-            oleo: "ACDelco PF52E",
-            ar: "Tecfil ARL8820",
-            combustivel: "Tecfil GI58",
-            cabine: "Tecfil ACP905"
-          }
-        }
-      }
-    }
+  "Toyota": {
+    "Corolla": { "2018": { "1.8": { oleo:"5W‑30 ou 0W‑20", quantidade:"4,0‑4,2L", filtros:{oleo:"Mann W610/9", ar:"Mann C 34 110", combustivel:"Mann WK 820/3", cabine:"Mann CU 2739"} } } }
   }
 };
 
@@ -161,11 +88,9 @@ function carregarModelos() {
   const modeloSelect = document.getElementById('modelo');
   const anoSelect = document.getElementById('ano');
   const motorSelect = document.getElementById('motor');
-
   modeloSelect.innerHTML = '<option value="">Selecione</option>';
   anoSelect.innerHTML = '<option value="">Selecione</option>';
   motorSelect.innerHTML = '<option value="">Selecione</option>';
-
   if (marca && banco[marca]) {
     for (let modelo in banco[marca]) {
       let option = document.createElement('option');
@@ -182,10 +107,8 @@ function carregarAnos() {
   const modelo = document.getElementById('modelo').value;
   const anoSelect = document.getElementById('ano');
   const motorSelect = document.getElementById('motor');
-
   anoSelect.innerHTML = '<option value="">Selecione</option>';
   motorSelect.innerHTML = '<option value="">Selecione</option>';
-
   if (marca && modelo && banco[marca][modelo]) {
     for (let ano in banco[marca][modelo]) {
       let option = document.createElement('option');
@@ -202,9 +125,7 @@ function carregarMotores() {
   const modelo = document.getElementById('modelo').value;
   const ano = document.getElementById('ano').value;
   const motorSelect = document.getElementById('motor');
-
   motorSelect.innerHTML = '<option value="">Selecione</option>';
-
   if (marca && modelo && ano && banco[marca][modelo][ano]) {
     for (let motor in banco[marca][modelo][ano]) {
       let option = document.createElement('option');
@@ -222,7 +143,6 @@ function buscarInfo() {
   const ano = document.getElementById('ano').value;
   const motor = document.getElementById('motor').value;
   const resultado = document.getElementById('resultado');
-
   if (marca && modelo && ano && motor) {
     const info = banco[marca][modelo][ano][motor];
     resultado.innerHTML = `
@@ -240,9 +160,7 @@ function buscarInfo() {
 }
 
 // Inicializar após carregar a página
-window.addEventListener('DOMContentLoaded', () => {
-  carregarMarcas();
-});
+window.addEventListener('DOMContentLoaded', carregarMarcas);
 </script>
 </body>
 </html>
