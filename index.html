@@ -52,9 +52,9 @@
   <h1>Consulta de Óleo Automotivo</h1>
 </header><div class="container">
   <label>Marca:</label>
-  <select id="marca" onchange="carregarModelos()">
+ <select id="marca" onchange="carregarModelos()">
     <option value="">Selecione</option>
-  </select><label>Modelo:</label> <select id="modelo" onchange="carregarMotores()"> <option value="">Selecione</option> </select>
+  </select><label>Modelo:</label> <select id="modelo" onchange="carregarAnos()"> <option value="">Selecione</option> </select>
   <label>Ano:</label>
 <select id="ano" onchange="carregarMotores()">
   <option value="">Selecione</option>
@@ -130,12 +130,14 @@ const banco = {
     }
   }
 };
-  function carregarAnos() {
+ function carregarAnos() {
   const marca = document.getElementById('marca').value;
   const modelo = document.getElementById('modelo').value;
   const anoSelect = document.getElementById('ano');
+  const motorSelect = document.getElementById('motor');
 
   anoSelect.innerHTML = '<option value="">Selecione</option>';
+  motorSelect.innerHTML = '<option value="">Selecione</option>';
 
   if (marca && modelo && banco[marca][modelo]) {
     for (let ano in banco[marca][modelo]) {
@@ -159,7 +161,12 @@ function carregarMarcas() {
 function carregarModelos() {
   const marca = document.getElementById('marca').value;
   const modeloSelect = document.getElementById('modelo');
+  const anoSelect = document.getElementById('ano');
+  const motorSelect = document.getElementById('motor');
+
   modeloSelect.innerHTML = '<option value="">Selecione</option>';
+  anoSelect.innerHTML = '<option value="">Selecione</option>';
+  motorSelect.innerHTML = '<option value="">Selecione</option>';
 
   if (marca && banco[marca]) {
     for (let modelo in banco[marca]) {
@@ -167,7 +174,6 @@ function carregarModelos() {
       option.value = modelo;
       option.textContent = modelo;
       modeloSelect.appendChild(option);
-      carregarAnos();
     }
   }
 }
