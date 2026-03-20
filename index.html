@@ -45,9 +45,14 @@ button {
   padding: 14px;
   border-radius: 10px;
   border: none;
-  background: #2563eb;
+  background: linear-gradient(45deg,#2563eb,#3b82f6);
   color: #fff;
   font-size: 16px;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
 }
 
 .relative { position: relative; }
@@ -59,17 +64,32 @@ button {
   overflow: auto;
   width: 100%;
   display: none;
+  z-index: 1000;
 }
 
 .suggestion-item {
   padding: 10px;
+  border-bottom: 1px solid #334155;
 }
+
+.suggestion-item:active {
+  background: #2563eb;
+}
+
+.status {
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.error { color: #f87171; }
 
 .result-card {
   margin-top: 15px;
   background: #1e293b;
   border-radius: 12px;
   overflow: hidden;
+  animation: fadeIn 0.4s ease;
 }
 
 .result-card img {
@@ -81,6 +101,29 @@ button {
 .result-content {
   padding: 15px;
 }
+
+.result-content h3 {
+  margin: 0 0 10px;
+}
+
+.result-content p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.badge {
+  display: inline-block;
+  background: #2563eb;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
 </style>
 </head>
 
@@ -90,7 +133,7 @@ button {
 
 <h2>🚗 Consulta Veicular PRO</h2>
 
-<div id="status"></div>
+<div id="status" class="status"></div>
 
 <div class="card">
 
@@ -110,7 +153,7 @@ button {
 <select id="ano" disabled></select>
 
 <select id="motor">
-  <option value="">Motor</option>
+  <option value="">Selecione o motor</option>
   <option value="1.0">1.0</option>
   <option value="1.4">1.4</option>
   <option value="1.6">1.6</option>
@@ -124,7 +167,7 @@ button {
   <option value="fram">Fram</option>
 </select>
 
-<button id="btnBuscar">Consultar</button>
+<button id="btnBuscar">🔍 Consultar</button>
 
 </div>
 
@@ -145,8 +188,9 @@ const motorEl = document.getElementById('motor');
 
 let modelos = [];
 
-function setStatus(msg){
+function setStatus(msg, erro=false){
   status.innerText = msg;
+  status.className = erro ? 'status error' : 'status';
 }
 
 async function fetchComBackup(url1, url2){
@@ -169,7 +213,7 @@ async function carregarMarcas(){
       `https://brasilapi.com.br/api/fipe/marcas/v1/${tipo.value}`
     );
 
-    marca.innerHTML = '<option value="">Marca</option>';
+    marca.innerHTML = '<option value="">Selecione a marca</option>';
 
     data.forEach(m=>{
       marca.add(new Option(m.nome, m.codigo));
@@ -178,7 +222,7 @@ async function carregarMarcas(){
     setStatus("");
 
   }catch{
-    setStatus("Erro ao carregar marcas");
+    setStatus("Erro ao carregar marcas", true);
   }
 }
 
@@ -205,7 +249,7 @@ marca.addEventListener('change', async ()=>{
     setStatus("");
 
   }catch{
-    setStatus("Erro modelos");
+    setStatus("Erro ao carregar modelos", true);
   }
 });
 
@@ -247,7 +291,7 @@ modelo.addEventListener('input', ()=>{
         setStatus("");
 
       }catch{
-        setStatus("Erro anos");
+        setStatus("Erro ao carregar anos", true);
       }
     };
 
@@ -262,12 +306,34 @@ document.getElementById('btnBuscar').addEventListener('click', ()=>{
   const marcaNome = marca.options[marca.selectedIndex]?.text;
   const modeloNome = modelo.value;
   const anoNome = ano.options[ano.selectedIndex]?.text;
+  const filtro = marcaFiltro.value;
   const motor = motorEl.value;
 
   if(!marca.value || !modeloNome || !ano.value || !motor){
-    alert("Preencha tudo");
+    alert("Preencha todos os campos");
     return;
   }
+
+  const filtros = {
+    wega: {
+      oleo: "WO-123",
+      ar: "FA-123",
+      combustivel: "FCI-123",
+      cabine: "AKX-123"
+    },
+    tecfil: {
+      oleo: "PSL55",
+      ar: "ARL4142",
+      combustivel: "FC123",
+      cabine: "ACP123"
+    },
+    fram: {
+      oleo: "PH7317",
+      ar: "CA9997",
+      combustivel: "G5915",
+      cabine: "CF10134"
+    }
+  };
 
   const oleoLitros = {
     "1.0": "3.0L",
@@ -277,9 +343,9 @@ document.getElementById('btnBuscar').addEventListener('click', ()=>{
     "diesel": "6.0L"
   };
 
+  const f = filtros[filtro];
   const litros = oleoLitros[motor] || "-";
 
-  // 🔥 IMAGEM MAIS PRECISA (BING)
   const imagem = `https://tse1.mm.bing.net/th?q=${marcaNome}+${modeloNome}+${anoNome}+carro+brasil`;
 
   resultado.innerHTML = `
@@ -289,8 +355,20 @@ document.getElementById('btnBuscar').addEventListener('click', ()=>{
       <h3>${marcaNome} ${modeloNome}</h3>
       <p>Ano: ${anoNome}</p>
       <p>Motor: ${motor}</p>
-      <p>Óleo: 5W-30</p>
+
+      <p>🛢️ Óleo: 5W-30</p>
       <p>Quantidade: ${litros}</p>
+
+      <hr>
+
+      <p><b>🔧 Filtros (${filtro.toUpperCase()}):</b></p>
+      <p>Óleo: ${f.oleo}</p>
+      <p>Ar: ${f.ar}</p>
+      <p>Combustível: ${f.combustivel}</p>
+      <p>Cabine: ${f.cabine}</p>
+
+      <span class="badge">Troca óleo: 10.000 km</span><br>
+      <span class="badge">Troca filtros: 15.000 km</span>
     </div>
   </div>
   `;
