@@ -54,10 +54,7 @@ button {
   white-space:pre-wrap;
 }
 
-.status {
-  font-size:14px;
-}
-
+.status { font-size:14px; }
 .error { color:red; }
 </style>
 </head>
@@ -89,6 +86,13 @@ button {
 <label>Ano</label>
 <select id="ano" disabled></select>
 
+<label>Marca do filtro</label>
+<select id="marcaFiltro">
+  <option value="wega">Wega</option>
+  <option value="tecfil">Tecfil</option>
+  <option value="fram">Fram</option>
+</select>
+
 <button id="btnBuscar">Consultar</button>
 
 <div id="resultado" class="result"></div>
@@ -103,16 +107,17 @@ const sugestoes = document.getElementById('sugestoes');
 const ano = document.getElementById('ano');
 const status = document.getElementById('status');
 const resultado = document.getElementById('resultado');
+const marcaFiltro = document.getElementById('marcaFiltro');
 
 let modelos = [];
 
-// 🔥 STATUS
+// STATUS
 function setStatus(msg, erro=false){
   status.innerText = msg;
   status.className = erro ? 'status error' : 'status';
 }
 
-// 🔥 FETCH COM FALLBACK
+// FETCH COM FALLBACK
 async function fetchComBackup(url1, url2){
   try{
     const r1 = await fetch(url1);
@@ -125,7 +130,7 @@ async function fetchComBackup(url1, url2){
   }
 }
 
-// 🔥 MARCAS
+// CARREGAR MARCAS
 async function carregarMarcas(){
   setStatus("Carregando marcas...");
 
@@ -148,7 +153,7 @@ async function carregarMarcas(){
   }
 }
 
-// 🔥 MODELOS
+// CARREGAR MODELOS
 marca.addEventListener('change', async ()=>{
   modelo.value='';
   modelo.disabled=true;
@@ -177,7 +182,7 @@ marca.addEventListener('change', async ()=>{
   }
 });
 
-// 🔥 AUTOCOMPLETE
+// AUTOCOMPLETE
 modelo.addEventListener('input', ()=>{
   const termo = modelo.value.toLowerCase();
 
@@ -227,17 +232,41 @@ modelo.addEventListener('input', ()=>{
   sugestoes.style.display = lista.length ? 'block' : 'none';
 });
 
-// 🔥 BOTÃO CONSULTAR
+// BOTÃO CONSULTAR
 document.getElementById('btnBuscar').addEventListener('click', ()=>{
 
   const marcaNome = marca.options[marca.selectedIndex]?.text;
   const modeloNome = modelo.value;
   const anoNome = ano.options[ano.selectedIndex]?.text;
+  const filtro = marcaFiltro.value;
 
   if(!marca.value || !modeloNome || !ano.value){
     alert("Preencha todos os campos");
     return;
   }
+
+  const filtros = {
+    wega: {
+      oleo: "WO-123",
+      ar: "FA-123",
+      combustivel: "FCI-123",
+      cabine: "AKX-123"
+    },
+    tecfil: {
+      oleo: "PSL55",
+      ar: "ARL4142",
+      combustivel: "FC123",
+      cabine: "ACP123"
+    },
+    fram: {
+      oleo: "PH7317",
+      ar: "CA9997",
+      combustivel: "G5915",
+      cabine: "CF10134"
+    }
+  };
+
+  const f = filtros[filtro];
 
   const texto = `
 Marca: ${marcaNome}
@@ -245,10 +274,12 @@ Modelo: ${modeloNome}
 Ano: ${anoNome}
 
 Óleo recomendado: 5W-30 API SP
-Filtro de óleo: Tecfil PSL55
-Filtro de ar: Tecfil ARL4142
-Filtro de combustível: Tecfil FC123
-Filtro de cabine: Tecfil ACP123
+
+🔧 Filtros (${filtro.toUpperCase()}):
+Filtro de óleo: ${f.oleo}
+Filtro de ar: ${f.ar}
+Filtro de combustível: ${f.combustivel}
+Filtro de cabine: ${f.cabine}
 
 Troca de óleo: 10.000 km
 Troca de filtros: 15.000 km
@@ -257,7 +288,7 @@ Troca de filtros: 15.000 km
   resultado.innerText = texto;
 });
 
-// 🔄 TROCAR TIPO
+// TROCAR TIPO
 tipo.addEventListener('change', carregarMarcas);
 
 // INICIAR
