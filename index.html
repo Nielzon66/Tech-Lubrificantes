@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta Veicular Offline</title>
+<title>Consulta Veicular Online - Otimizado</title>
 <style>
 body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:0; }
 header { background:#222; color:white; padding:15px; text-align:center; }
@@ -12,14 +12,14 @@ input, select, button { width:100%; padding:10px; margin:8px 0; border-radius:5p
 button { background:#007bff; color:white; border:none; cursor:pointer; }
 button:disabled { background:#999; cursor:not-allowed; }
 .result { margin-top:20px; padding:15px; background:#e9ecef; border-radius:8px; white-space:pre-wrap; }
-.suggestions { border:1px solid #ccc; background:white; max-height:150px; overflow-y:auto; position:absolute; z-index:10; width:calc(100% - 22px); }
+.suggestions { border:1px solid #ccc; background:white; max-height:200px; overflow-y:auto; position:absolute; z-index:10; width:calc(100% - 22px); }
 .suggestion-item { padding:5px; cursor:pointer; }
-.suggestion-item:hover { background:#007bff; color:white; }
+.suggestion-item:hover, .suggestion-active { background:#007bff; color:white; }
 .relative { position:relative; }
 </style>
 </head>
 <body>
-<header><h1>Consulta Veicular Offline</h1></header>
+<header><h1>Consulta Veicular Online - Otimizado</h1></header>
 
 <div class="container">
 <label>Marca:</label>
@@ -35,7 +35,17 @@ button:disabled { background:#999; cursor:not-allowed; }
 <select id="ano" disabled></select>
 
 <label>Motor:</label>
-<select id="motor" disabled></select>
+<select id="motor" disabled>
+  <option value="">Selecione o motor...</option>
+  <option value="1.0">1.0</option>
+  <option value="1.2">1.2</option>
+  <option value="1.4">1.4</option>
+  <option value="1.6">1.6</option>
+  <option value="2.0">2.0</option>
+  <option value="2.8">2.8</option>
+  <option value="3.2">3.2</option>
+  <option value="Turbo">Turbo</option>
+</select>
 
 <button id="btnBuscar" onclick="buscarInfo()" disabled>Consultar Especificações</button>
 
@@ -43,156 +53,125 @@ button:disabled { background:#999; cursor:not-allowed; }
 </div>
 
 <script>
-// 🚗 Base offline simplificada (simulação)
-const dadosVeiculos = {
-  "Toyota": {
-    "Corolla XEI 2.0": [2023,2022,2021],
-    "Hilux SRV 2.8": [2023,2022],
-    "Yaris XS 1.5": [2022,2021]
-  },
-  "Honda": {
-    "Civic EX 2.0": [2023,2022,2021],
-    "Fit LX 1.5": [2022,2021],
-    "HR-V EXL 1.8": [2023,2022]
-  },
-  "Ford": {
-    "Ka SE 1.0": [2023,2022,2021],
-    "EcoSport Titanium 2.0": [2022,2021],
-    "Ranger XLS 3.2": [2023,2022]
-  },
-  "Chevrolet": {
-    "Onix LT 1.0": [2023,2022,2021],
-    "S10 LTZ 2.8": [2023,2022],
-    "Tracker Premier 1.2": [2022,2021]
-  },
-  "Volkswagen": {
-    "Golf Highline 1.4": [2023,2022,2021],
-    "T-Cross Comfortline 1.4": [2023,2022],
-    "Polo MSI 1.6": [2022,2021]
-  }
-};
-
-const motoresDisponiveis = ['1.0','1.2','1.4','1.6','2.0','2.8','3.2','Turbo'];
-
-// 🔹 Filtros e óleos por marca
+const apiBase = 'https://brasilapi.com.br/api/fipe/carros';
 const filtrosMarcas = ['Tecfil','Wega','Fram'];
 
-// Simulação de informações técnicas
-const infoVeiculo = (marca, modelo, ano, motor) => {
-  const info = {
-    motor: motor,
-    potencia: motor.includes('2.0') || motor.includes('2.8') ? '150-200 hp' : '100-140 hp',
-    torque: motor.includes('2.0') || motor.includes('2.8') ? '200-400 Nm' : '150-180 Nm',
-    oleo: 'API SP 5W-30',
-    filtros: {},
-    intervaloOleo: '10.000 km',
-    intervaloFiltros: '15.000 km'
-  };
-  filtrosMarcas.forEach(f => {
-    info.filtros[f] = {
-      oleo: f+'-Oleo123',
-      ar: f+'-Ar123',
-      combustivel: f+'-Comb123',
-      cabine: f+'-Cab123'
-    };
-  });
-  return info;
-}
+let marcasData = {};
+let modelosData = {}; // marcaCodigo -> lista de modelos
 
-// 🔹 Carregar marcas
-function carregarMarcas() {
+// Carregar marcas
+async function carregarMarcas() {
   const sel = document.getElementById('marca');
-  sel.innerHTML = '<option value="">Selecione uma marca...</option>';
-  Object.keys(dadosVeiculos).forEach(m => sel.appendChild(new Option(m,m)));
-  sel.disabled = false;
-  document.getElementById('ano').disabled = true;
-  document.getElementById('motor').disabled = true;
-  document.getElementById('btnBuscar').disabled = true;
+  sel.innerHTML = '<option value="">Carregando...</option>';
+  try {
+    const res = await fetch(apiBase + '/marcas');
+    const marcas = await res.json();
+    sel.innerHTML = '<option value="">Selecione uma marca...</option>';
+    marcas.forEach(m => {
+      sel.appendChild(new Option(m.nome, m.codigo));
+      marcasData[m.codigo] = m.nome;
+    });
+  } catch(e) {
+    sel.innerHTML = '<option value="">Erro ao carregar marcas</option>';
+    console.error(e);
+  }
 }
 
-// 🔹 Autocomplete de modelos
+// Autocomplete de modelos com destaque
 const modeloInput = document.getElementById('modelo');
 const sugestoesBox = document.getElementById('sugestoes');
 
-modeloInput.addEventListener('input', () => {
-  const marca = document.getElementById('marca').value;
-  if(!marca || !dadosVeiculos[marca]) return;
+modeloInput.addEventListener('input', async () => {
+  const marcaCodigo = document.getElementById('marca').value;
+  if(!marcaCodigo) return;
+  if(!modelosData[marcaCodigo]) {
+    try {
+      const res = await fetch(`${apiBase}/marcas/${marcaCodigo}/modelos`);
+      const data = await res.json();
+      modelosData[marcaCodigo] = data.modelos;
+    } catch(e) { console.error(e); return; }
+  }
+
   const termo = modeloInput.value.toLowerCase();
-  const modelos = Object.keys(dadosVeiculos[marca]).filter(m => m.toLowerCase().includes(termo));
+  const modelos = modelosData[marcaCodigo].filter(m => m.nome.toLowerCase().includes(termo));
   sugestoesBox.innerHTML = '';
-  if(modelos.length > 0 && termo.length>0){
-    modelos.forEach(m => {
+  if(modelos.length && termo.length>0){
+    modelos.forEach((m, i) => {
       const div = document.createElement('div');
       div.classList.add('suggestion-item');
-      div.textContent = m;
+      div.innerHTML = m.nome.replace(new RegExp(termo, 'gi'), match => `<strong>${match}</strong>`);
       div.addEventListener('click', () => {
-        modeloInput.value = m;
-        carregarAnos();
-        sugestoesBox.style.display='none';
+        modeloInput.value = m.nome;
+        carregarAnos(marcaCodigo, m.codigo);
+        sugestoesBox.style.display = 'none';
       });
       sugestoesBox.appendChild(div);
     });
-    sugestoesBox.style.display = 'block';
-  } else {
-    sugestoesBox.style.display = 'none';
-  }
+    sugestoesBox.style.display='block';
+  } else sugestoesBox.style.display='none';
 });
 
-// 🔹 Carregar anos e motores
-function carregarAnos() {
-  const marca = document.getElementById('marca').value;
-  const modelo = modeloInput.value;
+// Carregar anos
+async function carregarAnos(marcaCodigo, modeloCodigo){
   const selAno = document.getElementById('ano');
-  selAno.innerHTML = '<option value="">Selecione o ano...</option>';
-  if(!marca || !modelo || !dadosVeiculos[marca][modelo]) return;
-  dadosVeiculos[marca][modelo].forEach(a => selAno.appendChild(new Option(a,a)));
-  selAno.disabled = false;
-  document.getElementById('motor').disabled = true;
-  document.getElementById('btnBuscar').disabled = true;
+  selAno.innerHTML = '<option value="">Carregando...</option>';
+  try {
+    const res = await fetch(`${apiBase}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos`);
+    const anos = await res.json();
+    selAno.innerHTML = '<option value="">Selecione o ano...</option>';
+    anos.forEach(a => selAno.appendChild(new Option(a.nome, a.codigo)));
+    selAno.disabled=false;
+  } catch(e) {
+    selAno.innerHTML = '<option value="">Erro ao carregar anos</option>';
+    console.error(e);
+  }
 }
 
-function carregarMotores() {
-  const selMotor = document.getElementById('motor');
-  selMotor.innerHTML = '<option value="">Selecione o motor...</option>';
-  motoresDisponiveis.forEach(m => selMotor.appendChild(new Option(m,m)));
-  selMotor.disabled = false;
-  document.getElementById('btnBuscar').disabled = true;
-}
-
-function checarPronto() {
-  document.getElementById('btnBuscar').disabled = !document.getElementById('motor').value;
-}
-
-// 🔹 Buscar info
-function buscarInfo() {
-  const marca = document.getElementById('marca').value;
-  const modelo = modeloInput.value;
-  const ano = document.getElementById('ano').value;
+// Habilitar botão
+document.getElementById('motor').addEventListener('change', () => {
   const motor = document.getElementById('motor').value;
-  if(!marca || !modelo || !ano || !motor) return;
+  const ano = document.getElementById('ano').value;
+  const modelo = modeloInput.value;
+  const marca = document.getElementById('marca').value;
+  document.getElementById('btnBuscar').disabled = !(motor && ano && modelo && marca);
+});
 
-  const info = infoVeiculo(marca, modelo, ano, motor);
-  let resultado = `Marca: ${marca}\nModelo: ${modelo}\nAno: ${ano}\nMotor: ${info.motor}\nPotência: ${info.potencia}\nTorque: ${info.torque}\nÓleo recomendado: ${info.oleo}\nIntervalo de troca de óleo: ${info.intervaloOleo}\nIntervalo de troca de filtros: ${info.intervaloFiltros}\n\n`;
+// Buscar informações e mostrar filtros completos
+async function buscarInfo(){
+  const marcaCodigo = document.getElementById('marca').value;
+  const marcaNome = marcasData[marcaCodigo];
+  const modeloNome = modeloInput.value;
+  const anoCodigo = document.getElementById('ano').value;
+  const motor = document.getElementById('motor').value;
 
-  filtrosMarcas.forEach(f => {
-    resultado += `-- Filtros ${f} --\nÓleo: ${info.filtros[f].oleo}\nAr: ${info.filtros[f].ar}\nCombustível: ${info.filtros[f].combustivel}\nCabine: ${info.filtros[f].cabine}\n\n`;
+  let veiculo = {};
+  try {
+    const modeloObj = modelosData[marcaCodigo].find(m=>m.nome===modeloNome);
+    if(modeloObj){
+      const res = await fetch(`${apiBase}/marcas/${marcaCodigo}/modelos/${modeloObj.codigo}/anos/${anoCodigo}`);
+      veiculo = await res.json();
+    }
+  } catch(e){ console.error(e); }
+
+  let resultado = `Marca: ${marcaNome}\nModelo: ${modeloNome}\nAno: ${veiculo.AnoModelo||'N/A'}\nMotor: ${motor}\n\n`;
+  filtrosMarcas.forEach(f=>{
+    resultado += `-- Filtros ${f} --\nÓleo: API SP 5W-30\nAr: ${f} AR\nCombustível: ${f} FC\nCabine: ${f} CB\n\n`;
   });
-
+  resultado += `Intervalo de troca de óleo: 10000 km\nIntervalo de troca de filtros: 15000 km`;
   document.getElementById('resultado').innerText = resultado;
 }
 
-// Eventos
-window.addEventListener('DOMContentLoaded', carregarMarcas);
-document.getElementById('marca').addEventListener('change', () => {
+// Evento marca reset
+document.getElementById('marca').addEventListener('change', ()=>{
   modeloInput.value='';
-  sugestoesBox.style.display='none';
-  document.getElementById('ano').innerHTML = '<option value="">---</option>';
-  document.getElementById('motor').innerHTML = '<option value="">---</option>';
-  document.getElementById('motor').disabled = true;
-  document.getElementById('btnBuscar').disabled = true;
+  document.getElementById('ano').innerHTML='<option value="">---</option>';
+  document.getElementById('ano').disabled=true;
+  document.getElementById('motor').value='';
+  document.getElementById('btnBuscar').disabled=true;
 });
-document.getElementById('ano').addEventListener('change', carregarMotores);
-document.getElementById('motor').addEventListener('change', checarPronto);
+
+// Inicializa
+carregarMarcas();
 </script>
 </body>
 </html>
