@@ -3,17 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta Veicular PRO</title>
+<title>Consulta Veicular</title>
 
 <style>
 body { font-family: Arial; background:#f4f4f4; }
 .container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
-input, select, button { width:100%; padding:10px; margin:8px 0; }
+input, select { width:100%; padding:10px; margin:8px 0; }
 .relative { position:relative; }
-.suggestions { position:absolute; background:#fff; border:1px solid #ccc; max-height:250px; overflow:auto; width:100%; display:none; }
+.suggestions { position:absolute; background:#fff; border:1px solid #ccc; max-height:200px; overflow:auto; width:100%; display:none; }
 .suggestion-item { padding:6px; cursor:pointer; }
 .suggestion-item:hover { background:#007bff; color:#fff; }
-.result { margin-top:15px; background:#eee; padding:10px; border-radius:8px; }
 </style>
 </head>
 
@@ -21,126 +20,119 @@ input, select, button { width:100%; padding:10px; margin:8px 0; }
 
 <div class="container">
 
-<h2>Consulta Veicular PRO</h2>
+<h2>Consulta Veicular</h2>
 
+<label>Tipo</label>
+<select id="tipo">
+  <option value="carros">Carros</option>
+  <option value="motos">Motos</option>
+  <option value="caminhoes">Caminhões</option>
+</select>
+
+<label>Marca</label>
 <select id="marca"></select>
 
+<label>Modelo</label>
 <div class="relative">
-<input id="modelo" placeholder="Digite o modelo...">
+<input id="modelo" placeholder="Digite o modelo">
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
+<label>Ano</label>
 <select id="ano"></select>
-
-<button id="btnBuscar">Consultar</button>
-
-<div id="resultado" class="result"></div>
 
 </div>
 
 <script>
+let modelos = [];
 
-// 🔥 BANCO (EXPANSÍVEL PRA 5 MIL)
-const banco = [
-{
-  marca:"Volkswagen",
-  modelo:"Gol",
-  anos:{
-    "2024": {oleo:"5W-30", oleoFiltro:"Tecfil PSL55", ar:"Tecfil ARL4142"},
-    "2023": {oleo:"5W-30", oleoFiltro:"Tecfil PSL55", ar:"Tecfil ARL4142"},
-    "2022": {oleo:"5W-30", oleoFiltro:"Tecfil PSL55", ar:"Tecfil ARL4142"}
-  }
-},
-{
-  marca:"Fiat",
-  modelo:"Uno",
-  anos:{
-    "2021": {oleo:"10W-40", oleoFiltro:"Wega WO-123", ar:"Wega FA123"},
-    "2020": {oleo:"10W-40", oleoFiltro:"Wega WO-123", ar:"Wega FA123"}
-  }
-},
-{
-  marca:"Honda",
-  modelo:"Civic",
-  anos:{
-    "2023": {oleo:"0W-20", oleoFiltro:"Fram PH7317", ar:"Fram CA9997"},
-    "2022": {oleo:"0W-20", oleoFiltro:"Fram PH7317", ar:"Fram CA9997"}
+// 🔥 CARREGAR MARCAS
+async function carregarMarcas() {
+  const tipo = document.getElementById('tipo').value;
+  const sel = document.getElementById('marca');
+
+  sel.innerHTML = '<option>Carregando...</option>';
+
+  try {
+    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas`);
+    const data = await res.json();
+
+    sel.innerHTML = '<option value="">Selecione a marca</option>';
+
+    data.forEach(m => {
+      sel.appendChild(new Option(m.nome, m.codigo));
+    });
+
+  } catch (e) {
+    sel.innerHTML = '<option>Erro ao carregar</option>';
+    console.error(e);
   }
 }
-];
 
-// 🔥 MARCAS
-const marcas = [...new Set(banco.map(c => c.marca))];
-marca.innerHTML = '<option>Selecione marca</option>';
-marcas.forEach(m => marca.add(new Option(m, m)));
+// 🔥 CARREGAR MODELOS
+document.getElementById('marca').addEventListener('change', async () => {
+  const tipo = document.getElementById('tipo').value;
+  const marca = document.getElementById('marca').value;
 
-let listaModelos = [];
+  if (!marca) return;
 
-marca.onchange = () => {
-  modelo.value = '';
-  ano.innerHTML = '';
-  
-  listaModelos = banco.filter(c => c.marca === marca.value);
-};
+  try {
+    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca}/modelos`);
+    const data = await res.json();
 
-// 🔥 BUSCA ULTRA RÁPIDA
-modelo.oninput = () => {
-  const termo = modelo.value.toLowerCase();
+    modelos = data.modelos || [];
 
-  const filtrados = listaModelos.filter(c =>
-    c.modelo.toLowerCase().includes(termo)
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+// 🔥 AUTOCOMPLETE
+const input = document.getElementById('modelo');
+const box = document.getElementById('sugestoes');
+
+input.addEventListener('input', () => {
+  const termo = input.value.toLowerCase();
+
+  const lista = modelos.filter(m =>
+    m.nome.toLowerCase().includes(termo)
   );
 
-  sugestoes.innerHTML = '';
+  box.innerHTML = '';
 
-  filtrados.forEach(c => {
+  lista.slice(0, 20).forEach(m => {
     const div = document.createElement('div');
     div.className = 'suggestion-item';
-    div.innerText = c.modelo;
+    div.innerText = m.nome;
 
-    div.onclick = () => {
-      modelo.value = c.modelo;
-      sugestoes.style.display = 'none';
+    div.onclick = async () => {
+      input.value = m.nome;
+      box.style.display = 'none';
 
-      ano.innerHTML = '';
+      const tipo = document.getElementById('tipo').value;
+      const marca = document.getElementById('marca').value;
 
-      Object.keys(c.anos).forEach(a => {
-        ano.add(new Option(a, a));
+      const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca}/${m.codigo}/anos`);
+      const anos = await res.json();
+
+      const selAno = document.getElementById('ano');
+      selAno.innerHTML = '';
+
+      anos.forEach(a => {
+        selAno.appendChild(new Option(a.nome, a.codigo));
       });
-
-      ano.selectedIndex = 0;
     };
 
-    sugestoes.appendChild(div);
+    box.appendChild(div);
   });
 
-  sugestoes.style.display = filtrados.length ? 'block' : 'none';
-};
+  box.style.display = lista.length ? 'block' : 'none';
+});
 
-// 🔥 RESULTADO
-btnBuscar.onclick = () => {
-  const carro = banco.find(c =>
-    c.marca === marca.value &&
-    c.modelo === modelo.value
-  );
+// 🔄 RECARREGAR
+document.getElementById('tipo').addEventListener('change', carregarMarcas);
 
-  if (!carro) return;
-
-  const dados = carro.anos[ano.value];
-
-  resultado.innerText =
-`Marca: ${carro.marca}
-Modelo: ${carro.modelo}
-Ano: ${ano.value}
-
-Óleo: ${dados.oleo}
-Filtro de óleo: ${dados.oleoFiltro}
-Filtro de ar: ${dados.ar}
-
-Troca óleo: 10.000km
-Troca filtros: 15.000km`;
-};
-
+carregarMarcas();
 </script>
 
 </body>
