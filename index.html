@@ -121,10 +121,13 @@ input.addEventListener('input', async () => {
         modeloSelecionado = m.codigo;
         box.style.display = 'none';
 
+        const selAno = document.getElementById('ano');
+        selAno.innerHTML = '<option>Carregando...</option>';
+        selAno.disabled = true;
+
         const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca}/${m.codigo}/anos`);
         const anos = await res.json();
 
-        const selAno = document.getElementById('ano');
         selAno.innerHTML = '<option value="">Selecione...</option>';
 
         anos.forEach(a => {
@@ -132,7 +135,10 @@ input.addEventListener('input', async () => {
         });
 
         selAno.disabled = false;
-        checar();
+
+        // 🔥 RESET correto
+        selAno.value = "";
+        document.getElementById('btnBuscar').disabled = true;
       };
 
       box.appendChild(div);
@@ -154,8 +160,10 @@ function checar() {
   document.getElementById('btnBuscar').disabled = !ok;
 }
 
-document.getElementById('motor').onchange = checar;
-document.getElementById('ano').onchange = checar;
+// 🔥 EVENTOS CORRETOS
+document.getElementById('motor').addEventListener('change', checar);
+document.getElementById('ano').addEventListener('change', checar);
+document.getElementById('marca').addEventListener('change', checar);
 
 document.getElementById('btnBuscar').onclick = () => {
   const tipo = document.getElementById('tipoVeiculo').value;
