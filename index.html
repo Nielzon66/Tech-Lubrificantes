@@ -33,9 +33,13 @@ input, select {
   border-bottom:1px solid #eee;
 }
 
-.suggestion-item:active {
-  background:#007bff;
-  color:#fff;
+.status {
+  font-size:14px;
+  margin-top:5px;
+}
+
+.error {
+  color:red;
 }
 </style>
 </head>
@@ -46,6 +50,8 @@ input, select {
 
 <h2>Consulta Veicular</h2>
 
+<div id="status" class="status"></div>
+
 <select id="tipo">
   <option value="carros">Carros</option>
   <option value="motos">Motos</option>
@@ -55,7 +61,7 @@ input, select {
 <select id="marca"></select>
 
 <div class="relative">
-<input id="modelo" placeholder="Digite o modelo..." disabled autocomplete="off">
+<input id="modelo" placeholder="Digite o modelo..." disabled>
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
@@ -69,92 +75,131 @@ const marca = document.getElementById('marca');
 const modelo = document.getElementById('modelo');
 const sugestoes = document.getElementById('sugestoes');
 const ano = document.getElementById('ano');
+const status = document.getElementById('status');
 
 let modelos = [];
 
-// 🔥 MARCAS
-async function carregarMarcas(){
-  marca.innerHTML = '<option>Carregando...</option>';
-
-  const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas`);
-  const data = await res.json();
-
-  marca.innerHTML = '<option value="">Selecione a marca</option>';
-
-  data.forEach(m=>{
-    marca.add(new Option(m.nome, m.codigo));
-  });
+function setStatus(msg, erro=false){
+  status.innerText = msg;
+  status.className = erro ? 'status error' : 'status';
 }
 
-// 🔥 AO ESCOLHER MARCA
+// 🔥 FETCH COM FALLBACK
+async function fetchComBackup(url1, url2){
+  try{
+    const r1 = await fetch(url1);
+    if(!r1.ok) throw "Erro 1";
+    return await r1.json();
+  }catch{
+    try{
+      const r2 = await fetch(url2);
+      if(!r2.ok) throw "Erro 2";
+      return await r2.json();
+    }catch{
+      throw "Falha total";
+    }
+  }
+}
+
+// 🔥 MARCAS
+async function carregarMarcas(){
+  setStatus("Carregando marcas...");
+
+  try{
+    const data = await fetchComBackup(
+      `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas`,
+      `https://brasilapi.com.br/api/fipe/marcas/v1/${tipo.value}`
+    );
+
+    marca.innerHTML = '<option value="">Selecione a marca</option>';
+
+    data.forEach(m=>{
+      marca.add(new Option(m.nome, m.codigo));
+    });
+
+    setStatus("Marcas carregadas");
+
+  }catch{
+    setStatus("Erro ao carregar marcas", true);
+  }
+}
+
+// 🔥 MODELOS
 marca.addEventListener('change', async ()=>{
-  modelo.value = '';
-  modelo.disabled = true;
-  sugestoes.style.display = 'none';
-  ano.innerHTML = '';
-  ano.disabled = true;
+  modelo.value='';
+  modelo.disabled=true;
+  ano.innerHTML='';
+  ano.disabled=true;
 
   if(!marca.value) return;
 
-  const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos`);
-  const data = await res.json();
+  setStatus("Carregando modelos...");
 
-  modelos = data.modelos || [];
+  try{
+    const data = await fetchComBackup(
+      `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos`,
+      `https://brasilapi.com.br/api/fipe/veiculos/v1/${tipo.value}/${marca.value}`
+    );
 
-  console.log("Modelos carregados:", modelos.length);
+    modelos = data.modelos || data;
 
-  modelo.disabled = false;
-  modelo.focus(); // 🔥 força foco
+    modelo.disabled=false;
+
+    setStatus("Digite o modelo");
+
+  }catch{
+    setStatus("Erro ao carregar modelos (API bloqueada)", true);
+  }
 });
 
-// 🔥 AUTOCOMPLETE CORRIGIDO
+// 🔥 AUTOCOMPLETE
 modelo.addEventListener('input', ()=>{
-  const termo = modelo.value.toLowerCase().trim();
+  const termo = modelo.value.toLowerCase();
 
-  if(!termo){
-    sugestoes.style.display = 'none';
-    return;
-  }
-
-  const filtrados = modelos.filter(m =>
+  const lista = modelos.filter(m =>
     m.nome.toLowerCase().includes(termo)
   );
 
-  sugestoes.innerHTML = '';
+  sugestoes.innerHTML='';
 
-  filtrados.slice(0,15).forEach(m=>{
-    const div = document.createElement('div');
-    div.className = 'suggestion-item';
-    div.textContent = m.nome;
+  lista.slice(0,15).forEach(m=>{
+    const div=document.createElement('div');
+    div.className='suggestion-item';
+    div.textContent=m.nome;
 
-    div.addEventListener('click', async ()=>{
-      modelo.value = m.nome;
-      sugestoes.style.display = 'none';
+    div.onclick=async ()=>{
+      modelo.value=m.nome;
+      sugestoes.style.display='none';
 
-      ano.innerHTML = '<option>Carregando...</option>';
+      setStatus("Carregando anos...");
 
-      const res = await fetch(
-        `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos/${m.codigo}/anos`
-      );
+      try{
+        const anos = await fetchComBackup(
+          `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos/${m.codigo}/anos`,
+          `https://brasilapi.com.br/api/fipe/veiculo/v1/${tipo.value}/${marca.value}/${m.codigo}`
+        );
 
-      const anos = await res.json();
+        ano.innerHTML='';
 
-      ano.innerHTML = '';
+        (anos.anos || anos).forEach(a=>{
+          ano.add(new Option(a.nome, a.codigo));
+        });
 
-      anos.forEach(a=>{
-        ano.add(new Option(a.nome, a.codigo));
-      });
+        ano.disabled=false;
 
-      ano.disabled = false;
-    });
+        setStatus("Anos carregados");
+
+      }catch{
+        setStatus("Erro ao carregar anos", true);
+      }
+    };
 
     sugestoes.appendChild(div);
   });
 
-  sugestoes.style.display = filtrados.length ? 'block' : 'none';
+  sugestoes.style.display = lista.length ? 'block' : 'none';
 });
 
-// 🔄 TROCAR TIPO
 tipo.addEventListener('change', carregarMarcas);
 
 carregarMarcas();
