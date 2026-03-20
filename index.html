@@ -3,17 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta Veicular</title>
+<title>Consulta Veicular PRO</title>
 
 <style>
 body { font-family: Arial; background:#f4f4f4; }
 .container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
 
-input, select {
+input, select, button {
   width:100%;
   padding:12px;
   margin:10px 0;
   font-size:16px;
+}
+
+button {
+  background:#007bff;
+  color:#fff;
+  border:none;
+  cursor:pointer;
 }
 
 .relative { position:relative; }
@@ -26,6 +33,7 @@ input, select {
   overflow:auto;
   width:100%;
   display:none;
+  z-index:1000;
 }
 
 .suggestion-item {
@@ -33,14 +41,24 @@ input, select {
   border-bottom:1px solid #eee;
 }
 
-.status {
-  font-size:14px;
-  margin-top:5px;
+.suggestion-item:active {
+  background:#007bff;
+  color:#fff;
 }
 
-.error {
-  color:red;
+.result {
+  margin-top:15px;
+  background:#eee;
+  padding:10px;
+  border-radius:8px;
+  white-space:pre-wrap;
 }
+
+.status {
+  font-size:14px;
+}
+
+.error { color:red; }
 </style>
 </head>
 
@@ -48,24 +66,32 @@ input, select {
 
 <div class="container">
 
-<h2>Consulta Veicular</h2>
+<h2>Consulta Veicular PRO</h2>
 
 <div id="status" class="status"></div>
 
+<label>Tipo</label>
 <select id="tipo">
   <option value="carros">Carros</option>
   <option value="motos">Motos</option>
   <option value="caminhoes">Caminhões</option>
 </select>
 
+<label>Marca</label>
 <select id="marca"></select>
 
+<label>Modelo</label>
 <div class="relative">
 <input id="modelo" placeholder="Digite o modelo..." disabled>
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
+<label>Ano</label>
 <select id="ano" disabled></select>
+
+<button id="btnBuscar">Consultar</button>
+
+<div id="resultado" class="result"></div>
 
 </div>
 
@@ -76,9 +102,11 @@ const modelo = document.getElementById('modelo');
 const sugestoes = document.getElementById('sugestoes');
 const ano = document.getElementById('ano');
 const status = document.getElementById('status');
+const resultado = document.getElementById('resultado');
 
 let modelos = [];
 
+// 🔥 STATUS
 function setStatus(msg, erro=false){
   status.innerText = msg;
   status.className = erro ? 'status error' : 'status';
@@ -88,16 +116,12 @@ function setStatus(msg, erro=false){
 async function fetchComBackup(url1, url2){
   try{
     const r1 = await fetch(url1);
-    if(!r1.ok) throw "Erro 1";
+    if(!r1.ok) throw "erro1";
     return await r1.json();
   }catch{
-    try{
-      const r2 = await fetch(url2);
-      if(!r2.ok) throw "Erro 2";
-      return await r2.json();
-    }catch{
-      throw "Falha total";
-    }
+    const r2 = await fetch(url2);
+    if(!r2.ok) throw "erro2";
+    return await r2.json();
   }
 }
 
@@ -128,6 +152,7 @@ async function carregarMarcas(){
 marca.addEventListener('change', async ()=>{
   modelo.value='';
   modelo.disabled=true;
+  sugestoes.style.display='none';
   ano.innerHTML='';
   ano.disabled=true;
 
@@ -148,7 +173,7 @@ marca.addEventListener('change', async ()=>{
     setStatus("Digite o modelo");
 
   }catch{
-    setStatus("Erro ao carregar modelos (API bloqueada)", true);
+    setStatus("Erro ao carregar modelos", true);
   }
 });
 
@@ -174,14 +199,16 @@ modelo.addEventListener('input', ()=>{
       setStatus("Carregando anos...");
 
       try{
-        const anos = await fetchComBackup(
+        const anosData = await fetchComBackup(
           `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos/${m.codigo}/anos`,
           `https://brasilapi.com.br/api/fipe/veiculo/v1/${tipo.value}/${marca.value}/${m.codigo}`
         );
 
+        const listaAnos = anosData.anos || anosData;
+
         ano.innerHTML='';
 
-        (anos.anos || anos).forEach(a=>{
+        listaAnos.forEach(a=>{
           ano.add(new Option(a.nome, a.codigo));
         });
 
@@ -200,8 +227,40 @@ modelo.addEventListener('input', ()=>{
   sugestoes.style.display = lista.length ? 'block' : 'none';
 });
 
+// 🔥 BOTÃO CONSULTAR
+document.getElementById('btnBuscar').addEventListener('click', ()=>{
+
+  const marcaNome = marca.options[marca.selectedIndex]?.text;
+  const modeloNome = modelo.value;
+  const anoNome = ano.options[ano.selectedIndex]?.text;
+
+  if(!marca.value || !modeloNome || !ano.value){
+    alert("Preencha todos os campos");
+    return;
+  }
+
+  const texto = `
+Marca: ${marcaNome}
+Modelo: ${modeloNome}
+Ano: ${anoNome}
+
+Óleo recomendado: 5W-30 API SP
+Filtro de óleo: Tecfil PSL55
+Filtro de ar: Tecfil ARL4142
+Filtro de combustível: Tecfil FC123
+Filtro de cabine: Tecfil ACP123
+
+Troca de óleo: 10.000 km
+Troca de filtros: 15.000 km
+`;
+
+  resultado.innerText = texto;
+});
+
+// 🔄 TROCAR TIPO
 tipo.addEventListener('change', carregarMarcas);
 
+// INICIAR
 carregarMarcas();
 </script>
 
