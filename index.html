@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,24 +49,37 @@
     }
   </style>
 </head>
-<body><header>
+<body>
+<header>
   <h1>Consulta de Óleo Automotivo</h1>
-</header><div class="container">
+</header>
+<div class="container">
   <label>Marca:</label>
- <select id="marca" onchange="carregarModelos()">
+  <select id="marca" onchange="carregarModelos()">
     <option value="">Selecione</option>
-  </select><label>Modelo:</label> <select id="modelo" onchange="carregarAnos()"> <option value="">Selecione</option> </select>
+  </select>
+
+  <label>Modelo:</label>
+  <select id="modelo" onchange="carregarAnos()">
+    <option value="">Selecione</option>
+  </select>
+
   <label>Ano:</label>
-<select id="ano" onchange="carregarMotores()">
-  <option value="">Selecione</option>
-</select>
+  <select id="ano" onchange="carregarMotores()">
+    <option value="">Selecione</option>
+  </select>
 
-<label>Motor:</label> <select id="motor"> <option value="">Selecione</option> </select>
+  <label>Motor:</label>
+  <select id="motor">
+    <option value="">Selecione</option>
+  </select>
 
-<button onclick="buscarInfo()">Consultar</button>
+  <button onclick="buscarInfo()">Consultar</button>
 
   <div class="result" id="resultado"></div>
-</div><script>
+</div>
+
+<script>
 const banco = {
   "Volkswagen": {
     "Gol": {
@@ -95,7 +109,6 @@ const banco = {
       }
     }
   },
-
   "Fiat": {
     "Uno": {
       "2013": {
@@ -112,7 +125,6 @@ const banco = {
       }
     }
   },
-
   "Chevrolet": {
     "Onix": {
       "2019": {
@@ -130,26 +142,11 @@ const banco = {
     }
   }
 };
- function carregarAnos() {
-  const marca = document.getElementById('marca').value;
-  const modelo = document.getElementById('modelo').value;
-  const anoSelect = document.getElementById('ano');
-  const motorSelect = document.getElementById('motor');
 
-  anoSelect.innerHTML = '<option value="">Selecione</option>';
-  motorSelect.innerHTML = '<option value="">Selecione</option>';
-
-  if (marca && modelo && banco[marca][modelo]) {
-    for (let ano in banco[marca][modelo]) {
-      let option = document.createElement('option');
-      option.value = ano;
-      option.textContent = ano;
-      anoSelect.appendChild(option);
-    }
-  }
-}
+// Carregar marcas
 function carregarMarcas() {
   const marcaSelect = document.getElementById('marca');
+  marcaSelect.innerHTML = '<option value="">Selecione</option>';
   for (let marca in banco) {
     let option = document.createElement('option');
     option.value = marca;
@@ -158,6 +155,7 @@ function carregarMarcas() {
   }
 }
 
+// Carregar modelos
 function carregarModelos() {
   const marca = document.getElementById('marca').value;
   const modeloSelect = document.getElementById('modelo');
@@ -178,6 +176,27 @@ function carregarModelos() {
   }
 }
 
+// Carregar anos
+function carregarAnos() {
+  const marca = document.getElementById('marca').value;
+  const modelo = document.getElementById('modelo').value;
+  const anoSelect = document.getElementById('ano');
+  const motorSelect = document.getElementById('motor');
+
+  anoSelect.innerHTML = '<option value="">Selecione</option>';
+  motorSelect.innerHTML = '<option value="">Selecione</option>';
+
+  if (marca && modelo && banco[marca][modelo]) {
+    for (let ano in banco[marca][modelo]) {
+      let option = document.createElement('option');
+      option.value = ano;
+      option.textContent = ano;
+      anoSelect.appendChild(option);
+    }
+  }
+}
+
+// Carregar motores
 function carregarMotores() {
   const marca = document.getElementById('marca').value;
   const modelo = document.getElementById('modelo').value;
@@ -195,6 +214,8 @@ function carregarMotores() {
     }
   }
 }
+
+// Buscar informações
 function buscarInfo() {
   const marca = document.getElementById('marca').value;
   const modelo = document.getElementById('modelo').value;
@@ -204,11 +225,9 @@ function buscarInfo() {
 
   if (marca && modelo && ano && motor) {
     const info = banco[marca][modelo][ano][motor];
-
     resultado.innerHTML = `
       <strong>Óleo:</strong> ${info.oleo}<br>
       <strong>Quantidade:</strong> ${info.quantidade}<br><br>
-
       <strong>Filtros:</strong><br>
       Óleo: ${info.filtros.oleo}<br>
       Ar: ${info.filtros.ar}<br>
@@ -219,6 +238,11 @@ function buscarInfo() {
     resultado.innerHTML = "Selecione todas as opções";
   }
 }
-carregarMarcas();
-</script></body>
+
+// Inicializar após carregar a página
+window.addEventListener('DOMContentLoaded', () => {
+  carregarMarcas();
+});
+</script>
+</body>
 </html>
