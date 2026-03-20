@@ -1,0 +1,39 @@
+{
+  "Toyota": {
+    "Corolla XEI 2.0 16V Aut.": {
+      "2023": {
+        "motor": "2.0",
+        "filtros": {
+          "Tecfil": {"oleo":"API SP 5W-30","ar":"Tecfil AR","combustivel":"Tecfil FC","cabine":"Tecfil CB"},
+          "Wega": {"oleo":"API SP 5W-30","ar":"Wega AR","combustivel":"Wega FC","cabine":"Wega CB"},
+          "Fram": {"oleo":"API SP 5W-30","ar":"Fram AR","combustivel":"Fram FC","cabine":"Fram CB"}
+        },
+        "intervalo": {"oleo":"10000 km","filtros":"15000 km"}
+      }
+    },
+    "Hilux SRV 2.8 16V Diesel": {
+      "2023": {
+        "motor":"2.8",
+        "filtros":{
+          "Tecfil":{"oleo":"API SP 5W-30","ar":"Tecfil AR","combustivel":"Tecfil FC","cabine":"Tecfil CB"},
+          "Wega":{"oleo":"API SP 5W-30","ar":"Wega AR","combustivel":"Wega FC","cabine":"Wega CB"},
+          "Fram":{"oleo":"API SP 5W-30","ar":"Fram AR","combustivel":"Fram FC","cabine":"Fram CB"}
+        },
+        "intervalo":{"oleo":"10000 km","filtros":"15000 km"}
+      }
+    }
+  },
+  "Honda": {
+    "Civic EX 2.0 16V Aut.": {
+      "2023": {
+        "motor":"2.0",
+        "filtros":{
+          "Tecfil":{"oleo":"API SP 5W-30","ar":"Tecfil AR","combustivel":"Tecfil FC","cabine":"Tecfil CB"},
+          "Wega":{"oleo":"API SP 5W-30","ar":"Wega AR","combustivel":"Wega FC","cabine":"Wega CB"},
+          "Fram":{"oleo":"API SP 5W-30","ar":"Fram AR","combustivel":"Fram FC","cabine":"Fram CB"}
+        },
+        "intervalo":{"oleo":"10000 km","filtros":"15000 km"}
+      }
+    }
+  }
+}
