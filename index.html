@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta Veicular Online</title>
+<title>Consulta Veicular</title>
 
 <style>
 body { font-family: Arial; background:#f4f4f4; }
@@ -16,6 +16,8 @@ input, select { width:100%; padding:10px; margin:8px 0; }
 }
 .suggestion-item { padding:6px; cursor:pointer; }
 .suggestion-item:hover { background:#007bff; color:#fff; }
+.status { font-size:14px; color:#555; margin-top:5px; }
+.error { color:red; }
 </style>
 </head>
 
@@ -23,7 +25,9 @@ input, select { width:100%; padding:10px; margin:8px 0; }
 
 <div class="container">
 
-<h2>Consulta Veicular (Online)</h2>
+<h2>Consulta Veicular</h2>
+
+<div id="status" class="status"></div>
 
 <label>Tipo</label>
 <select id="tipo">
@@ -47,22 +51,30 @@ input, select { width:100%; padding:10px; margin:8px 0; }
 </div>
 
 <script>
-
-// 🔥 PEGAR ELEMENTOS CORRETAMENTE
 const tipoEl = document.getElementById('tipo');
 const marcaEl = document.getElementById('marca');
 const modeloEl = document.getElementById('modelo');
 const sugestoesEl = document.getElementById('sugestoes');
 const anoEl = document.getElementById('ano');
+const statusEl = document.getElementById('status');
 
 let modelos = [];
 
-// 🔥 CARREGAR MARCAS
+function setStatus(msg, erro=false){
+  statusEl.innerText = msg;
+  statusEl.className = erro ? 'status error' : 'status';
+}
+
+// 🔥 MARCAS
 async function carregarMarcas() {
+  setStatus('Carregando marcas...');
   marcaEl.innerHTML = '<option>Carregando...</option>';
 
   try {
     const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipoEl.value}/marcas`);
+
+    if (!res.ok) throw new Error("Erro HTTP");
+
     const data = await res.json();
 
     marcaEl.innerHTML = '<option value="">Selecione</option>';
@@ -71,13 +83,16 @@ async function carregarMarcas() {
       marcaEl.add(new Option(m.nome, m.codigo));
     });
 
+    setStatus('Marcas carregadas');
+
   } catch (e) {
     console.error(e);
-    marcaEl.innerHTML = '<option>Erro ao carregar</option>';
+    marcaEl.innerHTML = '<option>Erro</option>';
+    setStatus('Erro ao carregar marcas (internet ou API)', true);
   }
 }
 
-// 🔥 QUANDO ESCOLHE MARCA
+// 🔥 MODELOS
 marcaEl.addEventListener('change', async () => {
   modeloEl.disabled = true;
   modeloEl.value = '';
@@ -86,16 +101,24 @@ marcaEl.addEventListener('change', async () => {
 
   if (!marcaEl.value) return;
 
+  setStatus('Carregando modelos...');
+
   try {
     const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipoEl.value}/${marcaEl.value}/modelos`);
+
+    if (!res.ok) throw new Error("Erro HTTP");
+
     const data = await res.json();
 
     modelos = data.modelos || [];
 
     modeloEl.disabled = false;
 
+    setStatus('Digite o modelo');
+
   } catch (e) {
     console.error(e);
+    setStatus('Erro ao carregar modelos', true);
   }
 });
 
@@ -109,7 +132,7 @@ modeloEl.addEventListener('input', () => {
 
   sugestoesEl.innerHTML = '';
 
-  lista.slice(0, 20).forEach(m => {
+  lista.slice(0,20).forEach(m => {
     const div = document.createElement('div');
     div.className = 'suggestion-item';
     div.innerText = m.nome;
@@ -118,11 +141,13 @@ modeloEl.addEventListener('input', () => {
       modeloEl.value = m.nome;
       sugestoesEl.style.display = 'none';
 
-      anoEl.innerHTML = '<option>Carregando...</option>';
-      anoEl.disabled = true;
+      setStatus('Carregando anos...');
 
       try {
         const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipoEl.value}/${marcaEl.value}/${m.codigo}/anos`);
+
+        if (!res.ok) throw new Error("Erro HTTP");
+
         const anos = await res.json();
 
         anoEl.innerHTML = '<option value="">Selecione</option>';
@@ -133,8 +158,11 @@ modeloEl.addEventListener('input', () => {
 
         anoEl.disabled = false;
 
+        setStatus('Anos carregados');
+
       } catch (e) {
         console.error(e);
+        setStatus('Erro ao carregar anos', true);
       }
     };
 
@@ -155,7 +183,6 @@ tipoEl.addEventListener('change', () => {
 
 // INICIAR
 carregarMarcas();
-
 </script>
 
 </body>
