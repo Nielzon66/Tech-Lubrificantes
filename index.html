@@ -301,7 +301,7 @@ modelo.addEventListener('input', ()=>{
   sugestoes.style.display = lista.length ? 'block' : 'none';
 });
 
-// 🔥 FUNÇÃO INTELIGENTE DE FILTROS
+// 🔥 BANCO DE FILTROS EXPANDIDO
 function gerarFiltros(modelo){
   modelo = modelo.toLowerCase();
 
@@ -329,11 +329,26 @@ function gerarFiltros(modelo){
     };
   }
 
-  // fallback
+  if(modelo.includes("onix")){
+    return {
+      wega:{oleo:"WO-351", ar:"FA-1900", combustivel:"FCI-600", cabine:"AKX-111"},
+      tecfil:{oleo:"PSL128", ar:"ARL8822", combustivel:"FC210", cabine:"ACP210"},
+      fram:{oleo:"PH10060", ar:"CA12000", combustivel:"G10500", cabine:"CF11000"}
+    };
+  }
+
+  if(modelo.includes("hb20")){
+    return {
+      wega:{oleo:"WO-480", ar:"FA-2020", combustivel:"FCI-777", cabine:"AKX-222"},
+      tecfil:{oleo:"PSL159", ar:"ARL9900", combustivel:"FC300", cabine:"ACP300"},
+      fram:{oleo:"PH10900", ar:"CA13000", combustivel:"G11000", cabine:"CF12000"}
+    };
+  }
+
   return {
-    wega:{oleo:"Consultar", ar:"Consultar", combustivel:"Consultar", cabine:"Consultar"},
-    tecfil:{oleo:"Consultar", ar:"Consultar", combustivel:"Consultar", cabine:"Consultar"},
-    fram:{oleo:"Consultar", ar:"Consultar", combustivel:"Consultar", cabine:"Consultar"}
+    wega:{oleo:"Não encontrado", ar:"Não encontrado", combustivel:"Não encontrado", cabine:"Não encontrado"},
+    tecfil:{oleo:"Não encontrado", ar:"Não encontrado", combustivel:"Não encontrado", cabine:"Não encontrado"},
+    fram:{oleo:"Não encontrado", ar:"Não encontrado", combustivel:"Não encontrado", cabine:"Não encontrado"}
   };
 }
 
