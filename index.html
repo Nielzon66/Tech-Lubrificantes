@@ -3,14 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta Veicular</title>
+<title>Consulta Veicular Online</title>
 
 <style>
 body { font-family: Arial; background:#f4f4f4; }
 .container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
 input, select { width:100%; padding:10px; margin:8px 0; }
 .relative { position:relative; }
-.suggestions { position:absolute; background:#fff; border:1px solid #ccc; max-height:200px; overflow:auto; width:100%; display:none; }
+.suggestions {
+  position:absolute; background:#fff; border:1px solid #ccc;
+  max-height:250px; overflow:auto; width:100%; display:none;
+}
 .suggestion-item { padding:6px; cursor:pointer; }
 .suggestion-item:hover { background:#007bff; color:#fff; }
 </style>
@@ -20,7 +23,7 @@ input, select { width:100%; padding:10px; margin:8px 0; }
 
 <div class="container">
 
-<h2>Consulta Veicular</h2>
+<h2>Consulta Veicular (Online)</h2>
 
 <label>Tipo</label>
 <select id="tipo">
@@ -34,12 +37,12 @@ input, select { width:100%; padding:10px; margin:8px 0; }
 
 <label>Modelo</label>
 <div class="relative">
-<input id="modelo" placeholder="Digite o modelo">
+<input id="modelo" placeholder="Digite o modelo..." disabled>
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
 <label>Ano</label>
-<select id="ano"></select>
+<select id="ano" disabled></select>
 
 </div>
 
@@ -48,57 +51,57 @@ let modelos = [];
 
 // 🔥 CARREGAR MARCAS
 async function carregarMarcas() {
-  const tipo = document.getElementById('tipo').value;
-  const sel = document.getElementById('marca');
-
-  sel.innerHTML = '<option>Carregando...</option>';
+  const tipo = tipo.value;
+  marca.innerHTML = '<option>Carregando...</option>';
 
   try {
     const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas`);
     const data = await res.json();
 
-    sel.innerHTML = '<option value="">Selecione a marca</option>';
+    marca.innerHTML = '<option value="">Selecione</option>';
 
     data.forEach(m => {
-      sel.appendChild(new Option(m.nome, m.codigo));
+      marca.add(new Option(m.nome, m.codigo));
     });
 
   } catch (e) {
-    sel.innerHTML = '<option>Erro ao carregar</option>';
-    console.error(e);
+    marca.innerHTML = '<option>Erro</option>';
   }
 }
 
-// 🔥 CARREGAR MODELOS
-document.getElementById('marca').addEventListener('change', async () => {
-  const tipo = document.getElementById('tipo').value;
-  const marca = document.getElementById('marca').value;
+// 🔥 AO ESCOLHER MARCA
+marca.onchange = async () => {
+  modelo.disabled = true;
+  modelo.value = '';
+  ano.innerHTML = '';
+  ano.disabled = true;
 
-  if (!marca) return;
+  if (!marca.value) return;
+
+  const tipo = tipoVeiculo.value || tipo.value;
 
   try {
-    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca}/modelos`);
+    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca.value}/modelos`);
     const data = await res.json();
 
     modelos = data.modelos || [];
 
+    modelo.disabled = false;
+
   } catch (e) {
     console.error(e);
   }
-});
+};
 
-// 🔥 AUTOCOMPLETE
-const input = document.getElementById('modelo');
-const box = document.getElementById('sugestoes');
-
-input.addEventListener('input', () => {
-  const termo = input.value.toLowerCase();
+// 🔥 AUTOCOMPLETE CORRETO
+modelo.oninput = () => {
+  const termo = modelo.value.toLowerCase();
 
   const lista = modelos.filter(m =>
     m.nome.toLowerCase().includes(termo)
   );
 
-  box.innerHTML = '';
+  sugestoes.innerHTML = '';
 
   lista.slice(0, 20).forEach(m => {
     const div = document.createElement('div');
@@ -106,32 +109,42 @@ input.addEventListener('input', () => {
     div.innerText = m.nome;
 
     div.onclick = async () => {
-      input.value = m.nome;
-      box.style.display = 'none';
+      modelo.value = m.nome;
+      sugestoes.style.display = 'none';
+
+      ano.innerHTML = '<option>Carregando...</option>';
+      ano.disabled = true;
 
       const tipo = document.getElementById('tipo').value;
-      const marca = document.getElementById('marca').value;
 
-      const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca}/${m.codigo}/anos`);
+      const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca.value}/${m.codigo}/anos`);
       const anos = await res.json();
 
-      const selAno = document.getElementById('ano');
-      selAno.innerHTML = '';
+      ano.innerHTML = '<option value="">Selecione</option>';
 
       anos.forEach(a => {
-        selAno.appendChild(new Option(a.nome, a.codigo));
+        ano.add(new Option(a.nome, a.codigo));
       });
+
+      ano.disabled = false;
     };
 
-    box.appendChild(div);
+    sugestoes.appendChild(div);
   });
 
-  box.style.display = lista.length ? 'block' : 'none';
-});
+  sugestoes.style.display = lista.length ? 'block' : 'none';
+};
 
-// 🔄 RECARREGAR
-document.getElementById('tipo').addEventListener('change', carregarMarcas);
+// 🔄 TROCAR TIPO
+tipo.onchange = () => {
+  modelo.value = '';
+  modelo.disabled = true;
+  ano.innerHTML = '';
+  ano.disabled = true;
+  carregarMarcas();
+};
 
+// INICIAR
 carregarMarcas();
 </script>
 
