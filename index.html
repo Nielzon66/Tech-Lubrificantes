@@ -6,9 +6,24 @@
 <title>Consulta Veicular PRO</title>
 
 <style>
-body { font-family: Arial; background:#0f172a; color:#fff; }
-.container { max-width:900px; margin:auto; padding:15px; }
-.card { background:#1e293b; padding:15px; border-radius:12px; }
+body {
+  font-family: Arial;
+  background:#0f172a;
+  color:#fff;
+  margin:0;
+}
+
+.container {
+  max-width:900px;
+  margin:auto;
+  padding:15px;
+}
+
+.card {
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+}
 
 input, select, button {
   width:100%;
@@ -18,9 +33,27 @@ input, select, button {
   border:none;
 }
 
-button { background:#2563eb; color:#fff; }
+button {
+  background:#2563eb;
+  color:#fff;
+}
 
-.result-card img { width:100%; height:200px; object-fit:cover; }
+.result-card {
+  margin-top:15px;
+  background:#1e293b;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.result-card img {
+  width:100%;
+  height:200px;
+  object-fit:cover;
+}
+
+.result-content {
+  padding:15px;
+}
 </style>
 </head>
 
@@ -28,25 +61,38 @@ button { background:#2563eb; color:#fff; }
 
 <div class="container">
 
+<h2>🚗 Consulta Veicular PRO</h2>
+
 <div class="card">
 
 <select id="tipo">
 <option value="carros">Carros</option>
+<option value="motos">Motos</option>
+<option value="caminhoes">Caminhões</option>
 </select>
 
 <select id="marca"></select>
 
-<input id="modelo" placeholder="Modelo">
+<div class="relative">
+<input id="modelo" placeholder="Digite o modelo..." disabled>
+<div id="sugestoes"></div>
+</div>
+
+<select id="ano" disabled></select>
 
 <select id="motor">
+<option value="">Motor</option>
 <option value="1.0">1.0</option>
+<option value="1.4">1.4</option>
 <option value="1.6">1.6</option>
 <option value="2.0">2.0</option>
+<option value="diesel">Diesel</option>
 </select>
 
 <select id="marcaFiltro">
 <option value="wega">Wega</option>
 <option value="tecfil">Tecfil</option>
+<option value="fram">Fram</option>
 </select>
 
 <button id="btnBuscar">Consultar</button>
@@ -58,22 +104,81 @@ button { background:#2563eb; color:#fff; }
 </div>
 
 <script>
+const tipo = document.getElementById('tipo');
+const marca = document.getElementById('marca');
+const modelo = document.getElementById('modelo');
+const sugestoes = document.getElementById('sugestoes');
+const ano = document.getElementById('ano');
+const resultado = document.getElementById('resultado');
+const motorEl = document.getElementById('motor');
+const marcaFiltro = document.getElementById('marcaFiltro');
+
+let modelos = [];
 let banco = {};
 
+// 🔥 CARREGAR BANCO JSON
 fetch("filtros.json")
 .then(r=>r.json())
-.then(data=>{
-  banco = data;
+.then(data=> banco = data);
+
+// 🔥 FETCH COM BACKUP
+async function fetchComBackup(url1, url2){
+  try{
+    const r1 = await fetch(url1);
+    if(!r1.ok) throw "";
+    return await r1.json();
+  }catch{
+    const r2 = await fetch(url2);
+    return await r2.json();
+  }
+}
+
+// 🔥 CARREGAR MARCAS
+async function carregarMarcas(){
+  const data = await fetchComBackup(
+    `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas`,
+    `https://brasilapi.com.br/api/fipe/marcas/v1/${tipo.value}`
+  );
+
+  marca.innerHTML = '<option value="">Selecione a marca</option>';
+  data.forEach(m=>marca.add(new Option(m.nome, m.codigo)));
+}
+
+// 🔥 CARREGAR MODELOS
+marca.addEventListener('change', async ()=>{
+  const data = await fetchComBackup(
+    `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos`,
+    `https://brasilapi.com.br/api/fipe/veiculos/v1/${tipo.value}/${marca.value}`
+  );
+
+  modelos = data.modelos || data;
+  modelo.disabled=false;
 });
 
-// 🔥 BUSCA REAL
+// 🔥 AUTOCOMPLETE
+modelo.addEventListener('input', ()=>{
+  const lista = modelos.filter(m =>
+    m.nome.toLowerCase().includes(modelo.value.toLowerCase())
+  );
+
+  sugestoes.innerHTML='';
+
+  lista.slice(0,10).forEach(m=>{
+    const div=document.createElement('div');
+    div.textContent=m.nome;
+    div.onclick=()=> modelo.value=m.nome;
+    sugestoes.appendChild(div);
+  });
+});
+
+// 🔥 BUSCA FINAL
 document.getElementById('btnBuscar').onclick = ()=>{
 
-  const modelo = document.getElementById('modelo').value.toLowerCase();
-  const motor = document.getElementById('motor').value;
-  const filtro = document.getElementById('marcaFiltro').value;
+  const modeloNome = modelo.value.toLowerCase();
+  const motor = motorEl.value;
+  const filtro = marcaFiltro.value;
 
-  const chave = modelo + " " + motor;
+  const chave = modeloNome + " " + motor;
 
   const dados = banco[chave]?.[filtro];
 
@@ -82,18 +187,25 @@ document.getElementById('btnBuscar').onclick = ()=>{
     return;
   }
 
-  const imagem = `https://tse1.mm.bing.net/th?q=${modelo}+carro`;
+  const imagem = `https://tse1.mm.bing.net/th?q=${modeloNome}+carro`;
 
-  document.getElementById('resultado').innerHTML = `
+  resultado.innerHTML = `
     <div class="result-card">
       <img src="${imagem}">
-      <p>Óleo: ${dados.oleo}</p>
-      <p>Ar: ${dados.ar}</p>
-      <p>Combustível: ${dados.combustivel}</p>
-      <p>Cabine: ${dados.cabine}</p>
+      <div class="result-content">
+        <p><b>${modeloNome.toUpperCase()}</b></p>
+        <p>Óleo: ${dados.oleo}</p>
+        <p>Ar: ${dados.ar}</p>
+        <p>Combustível: ${dados.combustivel}</p>
+        <p>Cabine: ${dados.cabine}</p>
+      </div>
     </div>
   `;
 };
+
+tipo.addEventListener('change', carregarMarcas);
+
+carregarMarcas();
 </script>
 
 </body>
