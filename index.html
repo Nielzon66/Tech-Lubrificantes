@@ -301,6 +301,42 @@ modelo.addEventListener('input', ()=>{
   sugestoes.style.display = lista.length ? 'block' : 'none';
 });
 
+// 🔥 FUNÇÃO INTELIGENTE DE FILTROS
+function gerarFiltros(modelo){
+  modelo = modelo.toLowerCase();
+
+  if(modelo.includes("gol")){
+    return {
+      wega:{oleo:"WO-348", ar:"FA-1234", combustivel:"FCI-567", cabine:"AKX-890"},
+      tecfil:{oleo:"PSL55", ar:"ARL4142", combustivel:"FC123", cabine:"ACP123"},
+      fram:{oleo:"PH6607", ar:"CA9997", combustivel:"G5915", cabine:"CF10134"}
+    };
+  }
+
+  if(modelo.includes("civic")){
+    return {
+      wega:{oleo:"WO-121", ar:"FA-777", combustivel:"FCI-222", cabine:"AKX-333"},
+      tecfil:{oleo:"PSL147", ar:"ARL4158", combustivel:"FC789", cabine:"ACP456"},
+      fram:{oleo:"PH7317", ar:"CA10242", combustivel:"G7323", cabine:"CF10285"}
+    };
+  }
+
+  if(modelo.includes("corolla")){
+    return {
+      wega:{oleo:"WO-150", ar:"FA-888", combustivel:"FCI-999", cabine:"AKX-444"},
+      tecfil:{oleo:"PSL56", ar:"ARL2208", combustivel:"FC456", cabine:"ACP789"},
+      fram:{oleo:"PH4967", ar:"CA4309", combustivel:"G10147", cabine:"CF9845"}
+    };
+  }
+
+  // fallback
+  return {
+    wega:{oleo:"Consultar", ar:"Consultar", combustivel:"Consultar", cabine:"Consultar"},
+    tecfil:{oleo:"Consultar", ar:"Consultar", combustivel:"Consultar", cabine:"Consultar"},
+    fram:{oleo:"Consultar", ar:"Consultar", combustivel:"Consultar", cabine:"Consultar"}
+  };
+}
+
 document.getElementById('btnBuscar').addEventListener('click', ()=>{
 
   const marcaNome = marca.options[marca.selectedIndex]?.text;
@@ -314,26 +350,8 @@ document.getElementById('btnBuscar').addEventListener('click', ()=>{
     return;
   }
 
-  const filtros = {
-    wega: {
-      oleo: "WO-123",
-      ar: "FA-123",
-      combustivel: "FCI-123",
-      cabine: "AKX-123"
-    },
-    tecfil: {
-      oleo: "PSL55",
-      ar: "ARL4142",
-      combustivel: "FC123",
-      cabine: "ACP123"
-    },
-    fram: {
-      oleo: "PH7317",
-      ar: "CA9997",
-      combustivel: "G5915",
-      cabine: "CF10134"
-    }
-  };
+  const filtros = gerarFiltros(modeloNome);
+  const f = filtros[filtro];
 
   const oleoLitros = {
     "1.0": "3.0L",
@@ -343,7 +361,6 @@ document.getElementById('btnBuscar').addEventListener('click', ()=>{
     "diesel": "6.0L"
   };
 
-  const f = filtros[filtro];
   const litros = oleoLitros[motor] || "-";
 
   const imagem = `https://tse1.mm.bing.net/th?q=${marcaNome}+${modeloNome}+${anoNome}+carro+brasil`;
