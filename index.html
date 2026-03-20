@@ -36,7 +36,7 @@ button:disabled { background:#999; cursor:not-allowed; }
 </div>
 
 <script>
-// Dados offline completos
+// 🚗 Dados completos offline
 const dadosVeiculos = {
     "Toyota": {
         "Corolla": [2023,2022,2021],
@@ -52,12 +52,22 @@ const dadosVeiculos = {
         "Ka": [2023,2022,2021],
         "EcoSport": [2022,2021],
         "Ranger": [2023,2022]
+    },
+    "Chevrolet": {
+        "Onix": [2023,2022,2021],
+        "S10": [2023,2022],
+        "Tracker": [2022,2021]
+    },
+    "Volkswagen": {
+        "Golf": [2023,2022,2021],
+        "T-Cross": [2023,2022],
+        "Polo": [2022,2021]
     }
 };
 
 const motoresDisponiveis = ['1.0','1.2','1.4','1.6','2.0','Turbo'];
 
-// Filtros e óleos padrão
+// 🔹 Filtros e óleo padrão
 const infoVeiculo = (marca, modelo, ano, motor) => ({
     motor: `${motor} 16V`,
     potencia: motor.includes('2.0') ? '150 hp' : '100 hp',
@@ -68,12 +78,17 @@ const infoVeiculo = (marca, modelo, ano, motor) => ({
     intervaloFiltros: '15.000 km'
 });
 
-// Funções de carregamento
+// 🔹 Funções de carregamento
 function carregarMarcas() {
     const sel = document.getElementById('marca');
+    if (!sel) return console.error("Select de marca não encontrado!");
     sel.innerHTML = '<option value="">Selecione uma marca...</option>';
     Object.keys(dadosVeiculos).forEach(m => sel.appendChild(new Option(m,m)));
     sel.disabled = false;
+    document.getElementById('modelo').disabled = true;
+    document.getElementById('ano').disabled = true;
+    document.getElementById('motor').disabled = true;
+    document.getElementById('btnBuscar').disabled = true;
 }
 
 function carregarModelos() {
@@ -81,6 +96,7 @@ function carregarModelos() {
     const selModelo = document.getElementById('modelo');
     const selAno = document.getElementById('ano');
     const selMotor = document.getElementById('motor');
+
     selModelo.innerHTML = '<option value="">Selecione o modelo...</option>';
     selAno.innerHTML = '<option value="">Selecione o ano...</option>';
     selMotor.innerHTML = '<option value="">Selecione o motor...</option>';
@@ -98,6 +114,7 @@ function carregarAnos() {
     const marca = document.getElementById('marca').value;
     const modelo = document.getElementById('modelo').value;
     const selAno = document.getElementById('ano');
+
     selAno.innerHTML = '<option value="">Selecione o ano...</option>';
     document.getElementById('motor').innerHTML = '<option value="">Selecione o motor...</option>';
     document.getElementById('btnBuscar').disabled = true;
@@ -121,7 +138,7 @@ function checarPronto() {
     document.getElementById('btnBuscar').disabled = !document.getElementById('motor').value;
 }
 
-// Mostrar resultados
+// 🔹 Exibir resultado
 function buscarInfo() {
     const marca = document.getElementById('marca').value;
     const modelo = document.getElementById('modelo').value;
@@ -137,7 +154,7 @@ function buscarInfo() {
         `Intervalo de troca de óleo: ${info.intervaloOleo}\nIntervalo de troca de filtros: ${info.intervaloFiltros}`;
 }
 
-// Eventos
+// 🔹 Eventos
 window.addEventListener('DOMContentLoaded', carregarMarcas);
 document.getElementById('marca').addEventListener('change', carregarModelos);
 document.getElementById('modelo').addEventListener('change', carregarAnos);
