@@ -72,6 +72,7 @@ let marcasData = {};
 let modelosData = {};
 let anosData = {};
 
+// Função corrigida para carregar marcas
 async function carregarMarcas() {
   const tipo = document.getElementById('tipoVeiculo').value;
   const sel = document.getElementById('marca');
@@ -81,15 +82,17 @@ async function carregarMarcas() {
     const marcas = await res.json();
     sel.innerHTML = '<option value="">Selecione uma marca...</option>';
     marcas.forEach(m => {
-      sel.appendChild(new Option(m.nome, m.codigo));
+      const option = new Option(m.nome, m.codigo);
+      sel.appendChild(option);
       marcasData[m.codigo] = m.nome;
     });
   } catch(e) {
+    console.error('Erro ao carregar marcas:', e);
     sel.innerHTML = '<option value="">Erro ao carregar marcas</option>';
-    console.error(e);
   }
 }
 
+// Autocomplete de modelo
 const modeloInput = document.getElementById('modelo');
 const sugestoesBox = document.getElementById('sugestoes');
 
@@ -125,6 +128,7 @@ modeloInput.addEventListener('input', async () => {
   } else sugestoesBox.style.display='none';
 });
 
+// Carregar anos
 async function carregarAnos(marcaCodigo, modeloCodigo) {
   const selAno = document.getElementById('ano');
   selAno.innerHTML = '<option value="">Carregando anos...</option>';
@@ -140,6 +144,7 @@ async function carregarAnos(marcaCodigo, modeloCodigo) {
   selAno.disabled = false;
 }
 
+// Habilitar botão
 function checarPronto() {
   const motor = document.getElementById('motor').value;
   const ano = document.getElementById('ano').value;
@@ -150,6 +155,7 @@ function checarPronto() {
 document.getElementById('motor').addEventListener('change', checarPronto);
 document.getElementById('ano').addEventListener('change', checarPronto);
 
+// Buscar info
 async function buscarInfo() {
   const tipo = document.getElementById('tipoVeiculo').value;
   const marcaCodigo = document.getElementById('marca').value;
@@ -175,6 +181,7 @@ async function buscarInfo() {
   document.getElementById('resultado').innerText = resultadoText;
 }
 
+// Resetar ao trocar tipo ou marca
 document.getElementById('tipoVeiculo').addEventListener('change', () => {
   modeloInput.value='';
   document.getElementById('ano').innerHTML='<option value="">---</option>';
