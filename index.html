@@ -25,7 +25,7 @@ button:disabled { background:#999; cursor:not-allowed; }
 
 <div class="container">
 
-<label>Tipo de veículo:</label>
+<label>Tipo:</label>
 <select id="tipoVeiculo">
   <option value="carros">Carros</option>
   <option value="motos">Motos</option>
@@ -37,7 +37,7 @@ button:disabled { background:#999; cursor:not-allowed; }
 
 <label>Modelo:</label>
 <div class="relative">
-<input type="text" id="modelo" placeholder="Digite o modelo..." autocomplete="off">
+<input type="text" id="modelo" placeholder="Digite o modelo...">
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
@@ -54,7 +54,7 @@ button:disabled { background:#999; cursor:not-allowed; }
 <select id="ano" disabled></select>
 
 <button id="btnBuscar" disabled>Consultar</button>
-<div class="result" id="resultado"></div>
+<div id="resultado" class="result"></div>
 
 </div>
 
@@ -63,138 +63,99 @@ let marcasData = {};
 let modelosData = {};
 
 async function carregarMarcas() {
-  const tipo = document.getElementById('tipoVeiculo').value;
-  const sel = document.getElementById('marca');
-
-  sel.innerHTML = '<option>Carregando...</option>';
+  const tipo = tipoVeiculo.value;
+  marca.innerHTML = '<option>Carregando...</option>';
 
   const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas`);
-  const marcas = await res.json();
+  const data = await res.json();
 
-  sel.innerHTML = '<option value="">Selecione...</option>';
+  marca.innerHTML = '<option value="">Selecione...</option>';
 
-  marcas.forEach(m => {
-    sel.appendChild(new Option(m.nome, m.codigo));
+  data.forEach(m => {
+    marca.add(new Option(m.nome, m.codigo));
     marcasData[m.codigo] = m.nome;
   });
 }
 
-const input = document.getElementById('modelo');
-const box = document.getElementById('sugestoes');
+modelo.addEventListener('input', async () => {
+  if (!marca.value) return;
 
-input.addEventListener('input', async () => {
-  const tipo = document.getElementById('tipoVeiculo').value;
-  const marca = document.getElementById('marca').value;
+  const tipo = tipoVeiculo.value;
 
-  if (!marca) return;
-
-  if (!modelosData[marca]) {
-    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca}/modelos`);
+  if (!modelosData[marca.value]) {
+    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca.value}/modelos`);
     const data = await res.json();
-    modelosData[marca] = data.modelos;
+    modelosData[marca.value] = data.modelos;
   }
 
-  const termo = input.value.toLowerCase();
-  const lista = modelosData[marca]
-    .filter(m => m.nome.toLowerCase().includes(termo))
-    .slice(0, 15);
+  const lista = modelosData[marca.value]
+    .filter(m => m.nome.toLowerCase().includes(modelo.value.toLowerCase()))
+    .slice(0, 10);
 
-  box.innerHTML = '';
+  sugestoes.innerHTML = '';
 
-  if (termo && lista.length) {
-    lista.forEach(m => {
-      const div = document.createElement('div');
-      div.className = 'suggestion-item';
-      div.innerText = m.nome;
+  lista.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'suggestion-item';
+    div.textContent = m.nome;
 
-      div.onclick = async () => {
-        input.value = m.nome;
-        box.style.display = 'none';
+    div.onclick = async () => {
+      modelo.value = m.nome;
+      sugestoes.style.display = 'none';
 
-        const tipo = document.getElementById('tipoVeiculo').value;
-        const marca = document.getElementById('marca').value;
+      const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca.value}/${m.codigo}/anos`);
+      const anos = await res.json();
 
-        const selAno = document.getElementById('ano');
-        selAno.innerHTML = '<option>Carregando...</option>';
-        selAno.disabled = true;
+      ano.innerHTML = '';
 
-        const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca}/${m.codigo}/anos`);
-        const anos = await res.json();
+      anos.forEach((a, i) => {
+        const opt = new Option(a.nome, a.codigo);
+        ano.add(opt);
+      });
 
-        selAno.innerHTML = '<option value="">Selecione...</option>';
+      ano.disabled = false;
 
-        anos.forEach(a => {
-          const opt = document.createElement("option");
-          opt.value = a.codigo;
-          opt.textContent = a.nome;
-          selAno.appendChild(opt);
-        });
+      // 🔥 FORÇA SELEÇÃO AUTOMÁTICA
+      if (ano.options.length > 0) {
+        ano.selectedIndex = 0;
+      }
 
-        selAno.disabled = false;
-      };
+      checar();
+    };
 
-      box.appendChild(div);
-    });
+    sugestoes.appendChild(div);
+  });
 
-    box.style.display = 'block';
-  } else {
-    box.style.display = 'none';
-  }
-});
-
-// 🔥 CORREÇÃO DEFINITIVA
-document.getElementById('ano').addEventListener('change', () => {
-  checar();
-});
-
-document.getElementById('motor').addEventListener('change', () => {
-  checar();
-});
-
-document.getElementById('marca').addEventListener('change', () => {
-  input.value = '';
-  document.getElementById('ano').innerHTML = '';
-  document.getElementById('ano').disabled = true;
-  document.getElementById('btnBuscar').disabled = true;
+  sugestoes.style.display = lista.length ? 'block' : 'none';
 });
 
 function checar() {
-  const marca = document.getElementById('marca').value;
-  const modelo = input.value;
-  const ano = document.getElementById('ano').value;
-  const motor = document.getElementById('motor').value;
-
-  const pronto = marca && modelo && ano && motor;
-
-  document.getElementById('btnBuscar').disabled = !pronto;
+  btnBuscar.disabled = !(marca.value && modelo.value && ano.value && motor.value);
 }
 
-document.getElementById('btnBuscar').onclick = () => {
-  const tipo = document.getElementById('tipoVeiculo').value;
-  const marca = marcasData[document.getElementById('marca').value];
-  const modelo = input.value;
-  const ano = document.getElementById('ano').value;
-  const motor = document.getElementById('motor').value;
+motor.onchange = checar;
+ano.onchange = checar;
 
-  document.getElementById('resultado').innerText =
-`Tipo: ${tipo}
-Marca: ${marca}
-Modelo: ${modelo}
-Ano: ${ano}
-Motor: ${motor}
-
-Óleo: 5W-30
-Troca óleo: 10.000km
-Troca filtros: 15.000km`;
+btnBuscar.onclick = () => {
+  resultado.innerText =
+`Marca: ${marcasData[marca.value]}
+Modelo: ${modelo.value}
+Ano: ${ano.value}
+Motor: ${motor.value}`;
 };
 
-document.getElementById('tipoVeiculo').addEventListener('change', () => {
-  input.value = '';
-  document.getElementById('ano').innerHTML = '';
-  document.getElementById('ano').disabled = true;
-  document.getElementById('btnBuscar').disabled = true;
+tipoVeiculo.onchange = () => {
+  modelo.value = '';
+  ano.innerHTML = '';
+  ano.disabled = true;
   carregarMarcas();
-});
+};
+
+marca.onchange = () => {
+  modelo.value = '';
+  ano.innerHTML = '';
+  ano.disabled = true;
+};
 
 carregarMarcas();
 </script>
