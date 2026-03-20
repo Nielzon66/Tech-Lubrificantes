@@ -17,8 +17,6 @@ button:disabled { background:#999; cursor:not-allowed; }
 .suggestions { border:1px solid #ccc; background:white; max-height:250px; overflow-y:auto; position:absolute; z-index:1000; width:100%; display:none; }
 .suggestion-item { padding:5px; cursor:pointer; }
 .suggestion-item:hover { background:#007bff; color:white; }
-.filter-row { display:flex; gap:10px; flex-wrap:wrap; }
-.filter-row select { flex:1; }
 </style>
 </head>
 
@@ -43,8 +41,6 @@ button:disabled { background:#999; cursor:not-allowed; }
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
-<div class="filter-row">
-<div>
 <label>Motor:</label>
 <select id="motor">
   <option value="">Selecione...</option>
@@ -53,13 +49,9 @@ button:disabled { background:#999; cursor:not-allowed; }
   <option value="2.0">2.0</option>
   <option value="Turbo">Turbo</option>
 </select>
-</div>
 
-<div>
 <label>Ano:</label>
 <select id="ano" disabled></select>
-</div>
-</div>
 
 <button id="btnBuscar" disabled>Consultar</button>
 <div class="result" id="resultado"></div>
@@ -69,7 +61,6 @@ button:disabled { background:#999; cursor:not-allowed; }
 <script>
 let marcasData = {};
 let modelosData = {};
-let modeloSelecionado = null;
 
 async function carregarMarcas() {
   const tipo = document.getElementById('tipoVeiculo').value;
@@ -118,8 +109,10 @@ input.addEventListener('input', async () => {
 
       div.onclick = async () => {
         input.value = m.nome;
-        modeloSelecionado = m.codigo;
         box.style.display = 'none';
+
+        const tipo = document.getElementById('tipoVeiculo').value;
+        const marca = document.getElementById('marca').value;
 
         const selAno = document.getElementById('ano');
         selAno.innerHTML = '<option>Carregando...</option>';
@@ -131,14 +124,13 @@ input.addEventListener('input', async () => {
         selAno.innerHTML = '<option value="">Selecione...</option>';
 
         anos.forEach(a => {
-          selAno.appendChild(new Option(a.nome, a.codigo));
+          const opt = document.createElement("option");
+          opt.value = a.codigo;
+          opt.textContent = a.nome;
+          selAno.appendChild(opt);
         });
 
         selAno.disabled = false;
-
-        // 🔥 RESET correto
-        selAno.value = "";
-        document.getElementById('btnBuscar').disabled = true;
       };
 
       box.appendChild(div);
@@ -150,20 +142,32 @@ input.addEventListener('input', async () => {
   }
 });
 
+// 🔥 CORREÇÃO DEFINITIVA
+document.getElementById('ano').addEventListener('change', () => {
+  checar();
+});
+
+document.getElementById('motor').addEventListener('change', () => {
+  checar();
+});
+
+document.getElementById('marca').addEventListener('change', () => {
+  input.value = '';
+  document.getElementById('ano').innerHTML = '';
+  document.getElementById('ano').disabled = true;
+  document.getElementById('btnBuscar').disabled = true;
+});
+
 function checar() {
-  const ok =
-    document.getElementById('marca').value &&
-    document.getElementById('motor').value &&
-    document.getElementById('ano').value &&
-    input.value;
+  const marca = document.getElementById('marca').value;
+  const modelo = input.value;
+  const ano = document.getElementById('ano').value;
+  const motor = document.getElementById('motor').value;
 
-  document.getElementById('btnBuscar').disabled = !ok;
+  const pronto = marca && modelo && ano && motor;
+
+  document.getElementById('btnBuscar').disabled = !pronto;
 }
-
-// 🔥 EVENTOS CORRETOS
-document.getElementById('motor').addEventListener('change', checar);
-document.getElementById('ano').addEventListener('change', checar);
-document.getElementById('marca').addEventListener('change', checar);
 
 document.getElementById('btnBuscar').onclick = () => {
   const tipo = document.getElementById('tipoVeiculo').value;
@@ -184,18 +188,13 @@ Troca óleo: 10.000km
 Troca filtros: 15.000km`;
 };
 
-document.getElementById('tipoVeiculo').onchange = () => {
+document.getElementById('tipoVeiculo').addEventListener('change', () => {
   input.value = '';
   document.getElementById('ano').innerHTML = '';
   document.getElementById('ano').disabled = true;
+  document.getElementById('btnBuscar').disabled = true;
   carregarMarcas();
-};
-
-document.getElementById('marca').onchange = () => {
-  input.value = '';
-  document.getElementById('ano').innerHTML = '';
-  document.getElementById('ano').disabled = true;
-};
+});
 
 carregarMarcas();
 </script>
