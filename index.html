@@ -65,24 +65,124 @@
 const banco = {
   "Fiat": {
     "Uno": {
-      "1.0": {
+      "1.0 Fire": {
         oleo: "5W-30",
         quantidade: "3,5L",
-        filtro: "Filtro padrão Fiat"
+        filtro: "Tecfil PSL55 / Fram PH6607"
+      }
+    },
+    "Palio": {
+      "1.0 Fire": {
+        oleo: "5W-30",
+        quantidade: "3,5L",
+        filtro: "Tecfil PSL55 / Fram PH6607"
+      },
+      "1.4 Fire": {
+        oleo: "10W-40",
+        quantidade: "4L",
+        filtro: "Tecfil PSL55"
+      }
+    },
+    "Strada": {
+      "1.4": {
+        oleo: "10W-40",
+        quantidade: "4L",
+        filtro: "Fram PH6607"
       }
     }
   },
+
   "Volkswagen": {
     "Gol": {
+      "1.0": {
+        oleo: "5W-40",
+        quantidade: "3,5L",
+        filtro: "Tecfil PSL56 / Fram PH5317"
+      },
       "1.6": {
         oleo: "5W-40",
         quantidade: "4L",
-        filtro: "Filtro VW"
+        filtro: "Mann W712/22"
+      }
+    },
+    "Fox": {
+      "1.6": {
+        oleo: "5W-40",
+        quantidade: "4L",
+        filtro: "Tecfil PSL56"
+      }
+    }
+  },
+
+  "Chevrolet": {
+    "Corsa": {
+      "1.4": {
+        oleo: "5W-30",
+        quantidade: "3,5L",
+        filtro: "Fram PH3387A"
+      }
+    },
+    "Onix": {
+      "1.0": {
+        oleo: "5W-30",
+        quantidade: "3,25L",
+        filtro: "ACDelco PF47E"
+      },
+      "1.4": {
+        oleo: "5W-30",
+        quantidade: "4L",
+        filtro: "ACDelco PF52E"
+      }
+    }
+  },
+
+  "Ford": {
+    "Ka": {
+      "1.0": {
+        oleo: "5W-20",
+        quantidade: "3,5L",
+        filtro: "Motorcraft FL400S"
+      }
+    },
+    "Fiesta": {
+      "1.6": {
+        oleo: "5W-30",
+        quantidade: "4L",
+        filtro: "Motorcraft FL910S"
+      }
+    }
+  },
+
+  "Hyundai": {
+    "HB20": {
+      "1.0": {
+        oleo: "5W-30",
+        quantidade: "3,3L",
+        filtro: "Mann W811/80"
+      },
+      "1.6": {
+        oleo: "5W-30",
+        quantidade: "3,6L",
+        filtro: "Tecfil PSL159"
+      }
+    }
+  },
+
+  "Toyota": {
+    "Corolla": {
+      "1.8": {
+        oleo: "5W-30",
+        quantidade: "4,2L",
+        filtro: "Tecfil PSL159 / Fram PH4967"
+      },
+      "2.0": {
+        oleo: "0W-20",
+        quantidade: "4,5L",
+        filtro: "Mann W610/9"
       }
     }
   }
 };
-
 function carregarMarcas() {
   const marcaSelect = document.getElementById('marca');
   for (let marca in banco) {
