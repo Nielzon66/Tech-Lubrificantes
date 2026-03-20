@@ -27,96 +27,111 @@ button:disabled { background:#999; cursor:not-allowed; }
 <label>Ano:</label>
 <select id="ano" disabled><option value="">Selecione o modelo primeiro</option></select>
 
-<label>Motor:</label>
-<select id="motor" disabled><option value="">Selecione o ano primeiro</option></select>
-
 <button id="btnBuscar" onclick="buscarInfo()" disabled>Consultar Especificações</button>
+
 <div class="result" id="resultado"></div>
 </div>
 
 <script>
-// API pública FIPE
-const API = "https://deividfortuna.github.io/fipe/v2/carros";
+// Base BrasilAPI FIPE
+const API = "https://brasilapi.com.br/api/fipe/carros";
 
-// Carregar marcas da FIPE
+// 🔹 Carregar todas as marcas
 async function carregarMarcas() {
     const sel = document.getElementById('marca');
     sel.innerHTML = '<option value="">Carregando marcas...</option>';
-    const res = await fetch(`${API}/marcas`);
-    const marcas = await res.json();
-    sel.innerHTML = '<option value="">Selecione uma marca...</option>';
-    marcas.forEach(m => sel.appendChild(new Option(m.nome, m.codigo)));
-    sel.disabled = false;
+    try {
+        const res = await fetch(`${API}/marcas`);
+        const marcas = await res.json();
+        sel.innerHTML = '<option value="">Selecione uma marca...</option>';
+        marcas.forEach(m => sel.appendChild(new Option(m.nome, m.codigo)));
+        sel.disabled = false;
+    } catch(e) {
+        sel.innerHTML = '<option value="">Erro ao carregar marcas</option>';
+    }
 }
 
-// Carregar modelos
+// 🔹 Carregar modelos da marca selecionada
 async function carregarModelos() {
     const marca = document.getElementById('marca').value;
     const selM = document.getElementById('modelo');
     const selA = document.getElementById('ano');
-    selM.innerHTML = '<option value="">Carregando...</option>';
+    selM.innerHTML = '<option value="">Carregando modelos...</option>';
     selA.innerHTML = '<option value="">---</option>';
-    document.getElementById('motor').innerHTML = '<option value="">---</option>';
     document.getElementById('btnBuscar').disabled = true;
 
     if (!marca) { selM.disabled = true; return; }
 
-    const r = await fetch(`${API}/${marca}/modelos`);
-    const d = await r.json();
-    selM.innerHTML = '<option value="">Selecione o modelo...</option>';
-    d.modelos.forEach(m => selM.appendChild(new Option(m.nome, m.codigo)));
-    selM.disabled = false;
+    try {
+        const res = await fetch(`${API}/marcas/${marca}/modelos`);
+        const data = await res.json();
+        selM.innerHTML = '<option value="">Selecione o modelo...</option>';
+        data.modelos.forEach(m => selM.appendChild(new Option(m.nome, m.codigo)));
+        selM.disabled = false;
+        selA.disabled = true;
+    } catch(e) {
+        selM.innerHTML = '<option value="">Erro ao carregar modelos</option>';
+    }
 }
 
-// Carregar anos
+// 🔹 Carregar anos do modelo selecionado
 async function carregarAnos() {
     const marca = document.getElementById('marca').value;
-    const mod = document.getElementById('modelo').value;
+    const modelo = document.getElementById('modelo').value;
     const selA = document.getElementById('ano');
     selA.innerHTML = '<option value="">Carregando anos...</option>';
-    document.getElementById('motor').innerHTML = '<option value="">---</option>';
     document.getElementById('btnBuscar').disabled = true;
 
-    if (!mod) { selA.disabled = true; return; }
+    if (!modelo) { selA.disabled = true; return; }
 
-    const r = await fetch(`${API}/${marca}/modelos/${mod}/anos`);
-    const anos = await r.json();
-    selA.innerHTML = '<option value="">Selecione o ano...</option>';
-    anos.forEach(a => selA.appendChild(new Option(a.nome, a.codigo)));
-    selA.disabled = false;
+    try {
+        const res = await fetch(`${API}/marcas/${marca}/modelos/${modelo}/anos`);
+        const anos = await res.json();
+        selA.innerHTML = '<option value="">Selecione o ano...</option>';
+        anos.forEach(a => selA.appendChild(new Option(a.nome, a.codigo)));
+        selA.disabled = false;
+    } catch(e) {
+        selA.innerHTML = '<option value="">Erro ao carregar anos</option>';
+    }
 }
 
-// Carregar motores (simulado)
-function carregarMotores() {
-    const sel = document.getElementById('motor');
-    const motores = ['1.0','1.2','1.4','1.6','2.0','Turbo'];
-    sel.innerHTML = '<option value="">Selecione motor...</option>';
-    motores.forEach(m => sel.appendChild(new Option(m, m)));
-    sel.disabled = false;
-    document.getElementById('btnBuscar').disabled = true;
+// 🔹 Buscar informações completas e valor FIPE
+async function buscarInfo() {
+    const marcaSel  = document.getElementById('marca');
+    const modeloSel = document.getElementById('modelo');
+    const anoSel    = document.getElementById('ano');
+
+    const marca  = marcaSel.value;
+    const modelo = modeloSel.value;
+    const ano    = anoSel.value;
+
+    const marcaNome  = marcaSel.selectedOptions[0].text;
+    const modeloNome = modeloSel.selectedOptions[0].text;
+    const anoNome    = anoSel.selectedOptions[0].text;
+
+    try {
+        const res = await fetch(`${API}/marcas/${marca}/modelos/${modelo}/anos/${ano}`);
+        const info = await res.json();
+        document.getElementById('resultado').innerText =
+            `Marca: ${marcaNome}\n` +
+            `Modelo: ${modeloNome}\n` +
+            `Ano: ${anoNome}\n` +
+            `Combustível: ${info.Combustivel}\n` +
+            `Código FIPE: ${info.CodigoFipe}\n` +
+            `Valor médio FIPE: ${info.Valor}\n` +
+            `Mês referência: ${info.MesReferencia}`;
+    } catch(e) {
+        document.getElementById('resultado').innerText = "Erro ao buscar informações do veículo.";
+    }
 }
 
-// Habilitar botão
-function checarPronto() {
-    document.getElementById('btnBuscar').disabled = !document.getElementById('motor').value;
-}
-
-// Mostrar resultado
-function buscarInfo() {
-    const Mar = document.getElementById('marca').selectedOptions[0].text;
-    const Mod = document.getElementById('modelo').selectedOptions[0].text;
-    const Ano = document.getElementById('ano').selectedOptions[0].text;
-    const Mot = document.getElementById('motor').value;
-    document.getElementById('resultado').innerText =
-        `Marca: ${Mar}\nModelo: ${Mod}\nAno: ${Ano}\nMotor: ${Mot}`;
-}
-
-//Eventos
+// Eventos
 window.onload = carregarMarcas;
 document.getElementById('marca').addEventListener('change', carregarModelos);
 document.getElementById('modelo').addEventListener('change', carregarAnos);
-document.getElementById('ano').addEventListener('change', carregarMotores);
-document.getElementById('motor').addEventListener('change', checarPronto);
+document.getElementById('ano').addEventListener('change', () => {
+    document.getElementById('btnBuscar').disabled = false;
+});
 </script>
 </body>
 </html>
