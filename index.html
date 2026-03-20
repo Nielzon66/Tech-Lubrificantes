@@ -3,16 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Busca Veicular Ultra Rápida</title>
+<title>Consulta Veicular PRO</title>
 
 <style>
 body { font-family: Arial; background:#f4f4f4; }
 .container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
 input, select, button { width:100%; padding:10px; margin:8px 0; }
 .relative { position:relative; }
-.suggestions { position:absolute; background:#fff; border:1px solid #ccc; max-height:200px; overflow:auto; width:100%; display:none; }
+.suggestions { position:absolute; background:#fff; border:1px solid #ccc; max-height:250px; overflow:auto; width:100%; display:none; }
 .suggestion-item { padding:6px; cursor:pointer; }
 .suggestion-item:hover { background:#007bff; color:#fff; }
+.result { margin-top:15px; background:#eee; padding:10px; border-radius:8px; }
 </style>
 </head>
 
@@ -20,14 +21,12 @@ input, select, button { width:100%; padding:10px; margin:8px 0; }
 
 <div class="container">
 
-<select id="tipoVeiculo">
-  <option value="carros">Carros</option>
-</select>
+<h2>Consulta Veicular PRO</h2>
 
 <select id="marca"></select>
 
 <div class="relative">
-<input id="modelo" placeholder="Digite modelo (ex: gol, civic)">
+<input id="modelo" placeholder="Digite o modelo...">
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
@@ -35,64 +34,112 @@ input, select, button { width:100%; padding:10px; margin:8px 0; }
 
 <button id="btnBuscar">Consultar</button>
 
+<div id="resultado" class="result"></div>
+
 </div>
 
 <script>
-// 🔥 LISTA LOCAL (ULTRA RÁPIDO)
-const modelosFixos = [
-  {nome:"Gol", codigo:"gol"},
-  {nome:"Voyage", codigo:"voyage"},
-  {nome:"Civic", codigo:"civic"},
-  {nome:"Corolla", codigo:"corolla"},
-  {nome:"Hilux", codigo:"hilux"},
-  {nome:"Onix", codigo:"onix"},
-  {nome:"HB20", codigo:"hb20"},
-  {nome:"Strada", codigo:"strada"},
-  {nome:"Palio", codigo:"palio"},
-  {nome:"Uno", codigo:"uno"}
+
+// 🔥 BANCO (EXPANSÍVEL PRA 5 MIL)
+const banco = [
+{
+  marca:"Volkswagen",
+  modelo:"Gol",
+  anos:{
+    "2024": {oleo:"5W-30", oleoFiltro:"Tecfil PSL55", ar:"Tecfil ARL4142"},
+    "2023": {oleo:"5W-30", oleoFiltro:"Tecfil PSL55", ar:"Tecfil ARL4142"},
+    "2022": {oleo:"5W-30", oleoFiltro:"Tecfil PSL55", ar:"Tecfil ARL4142"}
+  }
+},
+{
+  marca:"Fiat",
+  modelo:"Uno",
+  anos:{
+    "2021": {oleo:"10W-40", oleoFiltro:"Wega WO-123", ar:"Wega FA123"},
+    "2020": {oleo:"10W-40", oleoFiltro:"Wega WO-123", ar:"Wega FA123"}
+  }
+},
+{
+  marca:"Honda",
+  modelo:"Civic",
+  anos:{
+    "2023": {oleo:"0W-20", oleoFiltro:"Fram PH7317", ar:"Fram CA9997"},
+    "2022": {oleo:"0W-20", oleoFiltro:"Fram PH7317", ar:"Fram CA9997"}
+  }
+}
 ];
 
-// 🔥 BUSCA INSTANTÂNEA
+// 🔥 MARCAS
+const marcas = [...new Set(banco.map(c => c.marca))];
+marca.innerHTML = '<option>Selecione marca</option>';
+marcas.forEach(m => marca.add(new Option(m, m)));
+
+let listaModelos = [];
+
+marca.onchange = () => {
+  modelo.value = '';
+  ano.innerHTML = '';
+  
+  listaModelos = banco.filter(c => c.marca === marca.value);
+};
+
+// 🔥 BUSCA ULTRA RÁPIDA
 modelo.oninput = () => {
   const termo = modelo.value.toLowerCase();
 
-  const lista = modelosFixos.filter(m =>
-    m.nome.toLowerCase().includes(termo)
+  const filtrados = listaModelos.filter(c =>
+    c.modelo.toLowerCase().includes(termo)
   );
 
   sugestoes.innerHTML = '';
 
-  lista.forEach(m => {
+  filtrados.forEach(c => {
     const div = document.createElement('div');
     div.className = 'suggestion-item';
-    div.innerText = m.nome;
+    div.innerText = c.modelo;
 
     div.onclick = () => {
-      modelo.value = m.nome;
+      modelo.value = c.modelo;
       sugestoes.style.display = 'none';
 
-      // 🔥 ANOS MOCK (instantâneo)
-      ano.innerHTML = `
-        <option>2024</option>
-        <option>2023</option>
-        <option>2022</option>
-        <option>2021</option>
-      `;
+      ano.innerHTML = '';
+
+      Object.keys(c.anos).forEach(a => {
+        ano.add(new Option(a, a));
+      });
+
+      ano.selectedIndex = 0;
     };
 
     sugestoes.appendChild(div);
   });
 
-  sugestoes.style.display = lista.length ? 'block' : 'none';
+  sugestoes.style.display = filtrados.length ? 'block' : 'none';
 };
 
-// 🔥 MARCAS SIMPLES
-marca.innerHTML = `
-<option>Volkswagen</option>
-<option>Honda</option>
-<option>Toyota</option>
-<option>Fiat</option>
-`;
+// 🔥 RESULTADO
+btnBuscar.onclick = () => {
+  const carro = banco.find(c =>
+    c.marca === marca.value &&
+    c.modelo === modelo.value
+  );
+
+  if (!carro) return;
+
+  const dados = carro.anos[ano.value];
+
+  resultado.innerText =
+`Marca: ${carro.marca}
+Modelo: ${carro.modelo}
+Ano: ${ano.value}
+
+Óleo: ${dados.oleo}
+Filtro de óleo: ${dados.oleoFiltro}
+Filtro de ar: ${dados.ar}
+
+Troca óleo: 10.000km
+Troca filtros: 15.000km`;
+};
 
 </script>
 
