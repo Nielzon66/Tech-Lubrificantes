@@ -30,8 +30,8 @@ button:disabled { background:#999; cursor:not-allowed; }
 <label>Tipo de veículo:</label>
 <select id="tipoVeiculo">
   <option value="carros">Carros</option>
-  <option value="caminhoes">Caminhões</option>
   <option value="motos">Motos</option>
+  <option value="caminhoes">Caminhões</option>
 </select>
 
 <label>Marca:</label>
@@ -47,14 +47,10 @@ button:disabled { background:#999; cursor:not-allowed; }
 <div>
 <label>Motor:</label>
 <select id="motor">
-  <option value="">Selecione o motor...</option>
+  <option value="">Selecione...</option>
   <option value="1.0">1.0</option>
-  <option value="1.2">1.2</option>
-  <option value="1.4">1.4</option>
   <option value="1.6">1.6</option>
   <option value="2.0">2.0</option>
-  <option value="2.8">2.8</option>
-  <option value="3.2">3.2</option>
   <option value="Turbo">Turbo</option>
 </select>
 </div>
@@ -65,18 +61,15 @@ button:disabled { background:#999; cursor:not-allowed; }
 </div>
 </div>
 
-<button id="btnBuscar" disabled>Consultar Especificações</button>
-
+<button id="btnBuscar" disabled>Consultar</button>
 <div class="result" id="resultado"></div>
 
 </div>
 
 <script>
-const filtrosMarcas = ['Tecfil','Wega','Fram'];
 let marcasData = {};
 let modelosData = {};
-let anosData = {};
-let modeloSelecionadoCodigo = null;
+let modeloSelecionado = null;
 
 async function carregarMarcas() {
   const tipo = document.getElementById('tipoVeiculo').value;
@@ -84,152 +77,114 @@ async function carregarMarcas() {
 
   sel.innerHTML = '<option>Carregando...</option>';
 
-  try {
-    const res = await fetch(`https://brasilapi.com.br/api/fipe/marcas/v1/${tipo}`);
-    const marcas = await res.json();
+  const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas`);
+  const marcas = await res.json();
 
-    sel.innerHTML = '<option value="">Selecione...</option>';
+  sel.innerHTML = '<option value="">Selecione...</option>';
 
-    marcas.forEach(m => {
-      sel.appendChild(new Option(m.nome, m.codigo));
-      marcasData[m.codigo] = m.nome;
-    });
-
-  } catch(e) {
-    console.error(e);
-    sel.innerHTML = '<option>Erro ao carregar</option>';
-  }
+  marcas.forEach(m => {
+    sel.appendChild(new Option(m.nome, m.codigo));
+    marcasData[m.codigo] = m.nome;
+  });
 }
 
-const modeloInput = document.getElementById('modelo');
-const sugestoesBox = document.getElementById('sugestoes');
+const input = document.getElementById('modelo');
+const box = document.getElementById('sugestoes');
 
-modeloInput.addEventListener('input', async () => {
+input.addEventListener('input', async () => {
   const tipo = document.getElementById('tipoVeiculo').value;
-  const marcaCodigo = document.getElementById('marca').value;
+  const marca = document.getElementById('marca').value;
 
-  if (!marcaCodigo) return;
+  if (!marca) return;
 
-  if (!modelosData[marcaCodigo]) {
-    try {
-      const res = await fetch(`https://brasilapi.com.br/api/fipe/veiculos/v1/${tipo}/${marcaCodigo}`);
-      const data = await res.json();
-      modelosData[marcaCodigo] = data.modelos;
-    } catch(e) {
-      console.error(e);
-      return;
-    }
+  if (!modelosData[marca]) {
+    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca}/modelos`);
+    const data = await res.json();
+    modelosData[marca] = data.modelos;
   }
 
-  const termo = modeloInput.value.toLowerCase();
-
-  const filtrados = modelosData[marcaCodigo]
+  const termo = input.value.toLowerCase();
+  const lista = modelosData[marca]
     .filter(m => m.nome.toLowerCase().includes(termo))
-    .slice(0, 20);
+    .slice(0, 15);
 
-  sugestoesBox.innerHTML = '';
+  box.innerHTML = '';
 
-  if (filtrados.length && termo.length > 0) {
-    filtrados.forEach(m => {
+  if (termo && lista.length) {
+    lista.forEach(m => {
       const div = document.createElement('div');
       div.className = 'suggestion-item';
-      div.textContent = m.nome;
+      div.innerText = m.nome;
 
       div.onclick = async () => {
-        modeloInput.value = m.nome;
-        modeloSelecionadoCodigo = m.codigo;
+        input.value = m.nome;
+        modeloSelecionado = m.codigo;
+        box.style.display = 'none';
 
-        await carregarAnos(tipo, marcaCodigo, m.codigo);
+        const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca}/${m.codigo}/anos`);
+        const anos = await res.json();
 
-        sugestoesBox.style.display = 'none';
+        const selAno = document.getElementById('ano');
+        selAno.innerHTML = '<option value="">Selecione...</option>';
+
+        anos.forEach(a => {
+          selAno.appendChild(new Option(a.nome, a.codigo));
+        });
+
+        selAno.disabled = false;
+        checar();
       };
 
-      sugestoesBox.appendChild(div);
+      box.appendChild(div);
     });
 
-    sugestoesBox.style.display = 'block';
+    box.style.display = 'block';
   } else {
-    sugestoesBox.style.display = 'none';
+    box.style.display = 'none';
   }
 });
 
-async function carregarAnos(tipo, marca, modelo) {
-  const selAno = document.getElementById('ano');
+function checar() {
+  const ok =
+    document.getElementById('marca').value &&
+    document.getElementById('motor').value &&
+    document.getElementById('ano').value &&
+    input.value;
 
-  selAno.innerHTML = '<option>Carregando...</option>';
-  selAno.disabled = true;
-
-  try {
-    const res = await fetch(`https://brasilapi.com.br/api/fipe/veiculos/v1/${tipo}/${marca}/${modelo}`);
-    const anos = await res.json();
-
-    selAno.innerHTML = '<option value="">Selecione...</option>';
-
-    anos.forEach(a => {
-      selAno.appendChild(new Option(a.nome, a.codigo));
-    });
-
-    selAno.disabled = false;
-
-  } catch(e) {
-    console.error(e);
-    selAno.innerHTML = '<option>Erro</option>';
-  }
+  document.getElementById('btnBuscar').disabled = !ok;
 }
 
-function checarPronto() {
-  const motor = document.getElementById('motor').value;
-  const ano = document.getElementById('ano').value;
-  const modelo = modeloInput.value;
-  const marca = document.getElementById('marca').value;
-
-  document.getElementById('btnBuscar').disabled =
-    !(motor && ano && modelo && marca);
-}
-
-document.getElementById('motor').addEventListener('change', checarPronto);
-document.getElementById('ano').addEventListener('change', checarPronto);
+document.getElementById('motor').onchange = checar;
+document.getElementById('ano').onchange = checar;
 
 document.getElementById('btnBuscar').onclick = () => {
   const tipo = document.getElementById('tipoVeiculo').value;
   const marca = marcasData[document.getElementById('marca').value];
-  const modelo = modeloInput.value;
+  const modelo = input.value;
   const ano = document.getElementById('ano').value;
   const motor = document.getElementById('motor').value;
 
-  let texto = `Tipo: ${tipo}
+  document.getElementById('resultado').innerText =
+`Tipo: ${tipo}
 Marca: ${marca}
 Modelo: ${modelo}
 Ano: ${ano}
 Motor: ${motor}
 
-`;
-
-  filtrosMarcas.forEach(f => {
-    texto += `--- ${f} ---
 Óleo: 5W-30
-Ar: ${f}
-Combustível: ${f}
-Cabine: ${f}
-
-`;
-  });
-
-  texto += `Troca de óleo: 10.000 km
-Troca de filtros: 15.000 km`;
-
-  document.getElementById('resultado').innerText = texto;
+Troca óleo: 10.000km
+Troca filtros: 15.000km`;
 };
 
 document.getElementById('tipoVeiculo').onchange = () => {
-  modeloInput.value = '';
+  input.value = '';
   document.getElementById('ano').innerHTML = '';
   document.getElementById('ano').disabled = true;
   carregarMarcas();
 };
 
 document.getElementById('marca').onchange = () => {
-  modeloInput.value = '';
+  input.value = '';
   document.getElementById('ano').innerHTML = '';
   document.getElementById('ano').disabled = true;
 };
