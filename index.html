@@ -31,87 +31,68 @@ button:disabled { background:#999; cursor:not-allowed; }
 <select id="motor" disabled><option value="">Selecione o ano primeiro</option></select>
 
 <button id="btnBuscar" onclick="buscarInfo()" disabled>Consultar Especificações</button>
-
 <div class="result" id="resultado"></div>
 </div>
 
 <script>
-const apiBase = 'https://parallelum.com.br/fipe/api/v1/carros'; // API FIPE pública
+// API pública FIPE
+const API = "https://deividfortuna.github.io/fipe/v2/carros";
 
-// 🔹 Carregar marcas reais via API
+// Carregar marcas da FIPE
 async function carregarMarcas() {
     const sel = document.getElementById('marca');
     sel.innerHTML = '<option value="">Carregando marcas...</option>';
-    try {
-        const res = await fetch(`${apiBase}/marcas`);
-        const marcas = await res.json();
-        sel.innerHTML = '<option value="">Selecione uma marca...</option>';
-        marcas.forEach(m => sel.appendChild(new Option(m.nome, m.codigo)));
-        sel.disabled = false;
-    } catch(e) {
-        sel.innerHTML = '<option value="">Erro ao carregar marcas</option>';
-    }
+    const res = await fetch(`${API}/marcas`);
+    const marcas = await res.json();
+    sel.innerHTML = '<option value="">Selecione uma marca...</option>';
+    marcas.forEach(m => sel.appendChild(new Option(m.nome, m.codigo)));
+    sel.disabled = false;
 }
 
-// Carregar modelos via API
+// Carregar modelos
 async function carregarModelos() {
     const marca = document.getElementById('marca').value;
-    const selModelo = document.getElementById('modelo');
-    const selAno = document.getElementById('ano');
-    const selMotor = document.getElementById('motor');
-
-    selModelo.innerHTML = '<option value="">Carregando modelos...</option>';
-    selAno.innerHTML = '<option value="">Selecione o modelo...</option>';
-    selMotor.innerHTML = '<option value="">Selecione o ano...</option>';
+    const selM = document.getElementById('modelo');
+    const selA = document.getElementById('ano');
+    selM.innerHTML = '<option value="">Carregando...</option>';
+    selA.innerHTML = '<option value="">---</option>';
+    document.getElementById('motor').innerHTML = '<option value="">---</option>';
     document.getElementById('btnBuscar').disabled = true;
 
-    if (!marca) { selModelo.disabled = true; return; }
+    if (!marca) { selM.disabled = true; return; }
 
-    try {
-        const res = await fetch(`${apiBase}/marcas/${marca}/modelos`);
-        const data = await res.json();
-        selModelo.innerHTML = '<option value="">Selecione o modelo...</option>';
-        data.modelos.forEach(m => selModelo.appendChild(new Option(m.nome, m.codigo)));
-        selModelo.disabled = false;
-        selAno.disabled = true;
-        selMotor.disabled = true;
-    } catch(e) {
-        selModelo.innerHTML = '<option value="">Erro ao carregar modelos</option>';
-    }
+    const r = await fetch(`${API}/${marca}/modelos`);
+    const d = await r.json();
+    selM.innerHTML = '<option value="">Selecione o modelo...</option>';
+    d.modelos.forEach(m => selM.appendChild(new Option(m.nome, m.codigo)));
+    selM.disabled = false;
 }
 
-// Carregar anos via API
+// Carregar anos
 async function carregarAnos() {
     const marca = document.getElementById('marca').value;
-    const modelo = document.getElementById('modelo').value;
-    const selAno = document.getElementById('ano');
-    const selMotor = document.getElementById('motor');
-
-    selAno.innerHTML = '<option value="">Carregando anos...</option>';
-    selMotor.innerHTML = '<option value="">Selecione o ano...</option>';
+    const mod = document.getElementById('modelo').value;
+    const selA = document.getElementById('ano');
+    selA.innerHTML = '<option value="">Carregando anos...</option>';
+    document.getElementById('motor').innerHTML = '<option value="">---</option>';
     document.getElementById('btnBuscar').disabled = true;
 
-    if (!modelo) { selAno.disabled = true; return; }
+    if (!mod) { selA.disabled = true; return; }
 
-    try {
-        const res = await fetch(`${apiBase}/marcas/${marca}/modelos/${modelo}/anos`);
-        const anos = await res.json();
-        selAno.innerHTML = '<option value="">Selecione o ano...</option>';
-        anos.forEach(a => selAno.appendChild(new Option(a.nome, a.codigo)));
-        selAno.disabled = false;
-        selMotor.disabled = true;
-    } catch(e) {
-        selAno.innerHTML = '<option value="">Erro ao carregar anos</option>';
-    }
+    const r = await fetch(`${API}/${marca}/modelos/${mod}/anos`);
+    const anos = await r.json();
+    selA.innerHTML = '<option value="">Selecione o ano...</option>';
+    anos.forEach(a => selA.appendChild(new Option(a.nome, a.codigo)));
+    selA.disabled = false;
 }
 
-// Carregar motores (simulado, pois FIPE não retorna motor)
+// Carregar motores (simulado)
 function carregarMotores() {
-    const selMotor = document.getElementById('motor');
-    const motoresDisponiveis = ['1.0','1.2','1.4','1.6','2.0','Turbo'];
-    selMotor.innerHTML = '<option value="">Selecione o motor...</option>';
-    motoresDisponiveis.forEach(m => selMotor.appendChild(new Option(m, m)));
-    selMotor.disabled = false;
+    const sel = document.getElementById('motor');
+    const motores = ['1.0','1.2','1.4','1.6','2.0','Turbo'];
+    sel.innerHTML = '<option value="">Selecione motor...</option>';
+    motores.forEach(m => sel.appendChild(new Option(m, m)));
+    sel.disabled = false;
     document.getElementById('btnBuscar').disabled = true;
 }
 
@@ -120,19 +101,18 @@ function checarPronto() {
     document.getElementById('btnBuscar').disabled = !document.getElementById('motor').value;
 }
 
-// Busca info final (simulada)
+// Mostrar resultado
 function buscarInfo() {
-    const marcaText  = document.getElementById('marca').selectedOptions[0].text;
-    const modeloText = document.getElementById('modelo').selectedOptions[0].text;
-    const anoText    = document.getElementById('ano').selectedOptions[0].text;
-    const motor      = document.getElementById('motor').value;
-
+    const Mar = document.getElementById('marca').selectedOptions[0].text;
+    const Mod = document.getElementById('modelo').selectedOptions[0].text;
+    const Ano = document.getElementById('ano').selectedOptions[0].text;
+    const Mot = document.getElementById('motor').value;
     document.getElementById('resultado').innerText =
-        `Marca: ${marcaText}\nModelo: ${modeloText}\nAno: ${anoText}\nMotor: ${motor}\nPotência: 120 hp\nTorque: 160 Nm\nÓleo: API SP 5W-30`;
+        `Marca: ${Mar}\nModelo: ${Mod}\nAno: ${Ano}\nMotor: ${Mot}`;
 }
 
-// Eventos
-window.addEventListener('DOMContentLoaded', carregarMarcas);
+//Eventos
+window.onload = carregarMarcas;
 document.getElementById('marca').addEventListener('change', carregarModelos);
 document.getElementById('modelo').addEventListener('change', carregarAnos);
 document.getElementById('ano').addEventListener('change', carregarMotores);
