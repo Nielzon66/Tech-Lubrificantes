@@ -6,70 +6,56 @@
 <title>Consulta Veicular Avançada</title>
 
 <style>
-body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:0; }
-header { background:#222; color:white; padding:15px; text-align:center; }
-.container { max-width:900px; margin:30px auto; background:white; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1); }
-input, select, button { width:100%; padding:10px; margin:8px 0; border-radius:5px; border:1px solid #ccc; box-sizing:border-box; }
-button { background:#007bff; color:white; border:none; cursor:pointer; }
-button:disabled { background:#999; cursor:not-allowed; }
-.result { margin-top:20px; padding:15px; background:#e9ecef; border-radius:8px; white-space:pre-wrap; }
-.relative { position:relative; }
-.suggestions { border:1px solid #ccc; background:white; max-height:250px; overflow-y:auto; position:absolute; z-index:1000; width:100%; display:none; }
+body { font-family: Arial; background:#f4f4f4; }
+.container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
+input, select, button { width:100%; padding:10px; margin:8px 0; }
+.suggestions { position:absolute; background:#fff; border:1px solid #ccc; display:none; max-height:200px; overflow:auto; }
 .suggestion-item { padding:5px; cursor:pointer; }
-.suggestion-item:hover { background:#007bff; color:white; }
+.suggestion-item:hover { background:#007bff; color:#fff; }
+.relative { position:relative; }
 </style>
 </head>
 
 <body>
-<header><h1>Consulta Veicular Avançada</h1></header>
 
 <div class="container">
 
-<label>Tipo:</label>
 <select id="tipoVeiculo">
   <option value="carros">Carros</option>
   <option value="motos">Motos</option>
-  <option value="caminhoes">Caminhões</option>
 </select>
 
-<label>Marca:</label>
 <select id="marca"></select>
 
-<label>Modelo:</label>
 <div class="relative">
-<input type="text" id="modelo" placeholder="Digite o modelo...">
+<input id="modelo" placeholder="Digite modelo">
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
-<label>Motor:</label>
 <select id="motor">
-  <option value="">Selecione...</option>
-  <option value="1.0">1.0</option>
-  <option value="1.6">1.6</option>
-  <option value="2.0">2.0</option>
-  <option value="Turbo">Turbo</option>
+  <option value="">Motor</option>
+  <option>1.0</option>
+  <option>1.6</option>
 </select>
 
-<label>Ano:</label>
+<div id="anoContainer">
 <select id="ano" disabled></select>
+</div>
 
 <button id="btnBuscar" disabled>Consultar</button>
-<div id="resultado" class="result"></div>
 
 </div>
 
 <script>
-let marcasData = {};
 let modelosData = {};
+let marcasData = {};
 
 async function carregarMarcas() {
   const tipo = tipoVeiculo.value;
-  marca.innerHTML = '<option>Carregando...</option>';
-
   const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/marcas`);
   const data = await res.json();
 
-  marca.innerHTML = '<option value="">Selecione...</option>';
+  marca.innerHTML = '<option value="">Marca</option>';
 
   data.forEach(m => {
     marca.add(new Option(m.nome, m.codigo));
@@ -77,7 +63,7 @@ async function carregarMarcas() {
   });
 }
 
-modelo.addEventListener('input', async () => {
+modelo.oninput = async () => {
   if (!marca.value) return;
 
   const tipo = tipoVeiculo.value;
@@ -89,15 +75,14 @@ modelo.addEventListener('input', async () => {
   }
 
   const lista = modelosData[marca.value]
-    .filter(m => m.nome.toLowerCase().includes(modelo.value.toLowerCase()))
-    .slice(0, 10);
+    .filter(m => m.nome.toLowerCase().includes(modelo.value.toLowerCase()));
 
   sugestoes.innerHTML = '';
 
   lista.forEach(m => {
     const div = document.createElement('div');
     div.className = 'suggestion-item';
-    div.textContent = m.nome;
+    div.innerText = m.nome;
 
     div.onclick = async () => {
       modelo.value = m.nome;
@@ -106,19 +91,24 @@ modelo.addEventListener('input', async () => {
       const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo}/${marca.value}/${m.codigo}/anos`);
       const anos = await res.json();
 
-      ano.innerHTML = '';
+      console.log("ANOS:", anos); // DEBUG
 
-      anos.forEach((a, i) => {
-        const opt = new Option(a.nome, a.codigo);
-        ano.add(opt);
+      // 🔥 recria o select inteiro (resolve bug)
+      const container = document.getElementById('anoContainer');
+      container.innerHTML = '<select id="ano"></select>';
+
+      const novoSelect = document.getElementById('ano');
+
+      anos.forEach(a => {
+        novoSelect.add(new Option(a.nome, a.codigo));
       });
 
-      ano.disabled = false;
-
-      // 🔥 FORÇA SELEÇÃO AUTOMÁTICA
-      if (ano.options.length > 0) {
-        ano.selectedIndex = 0;
+      // 🔥 força seleção real
+      if (anos.length > 0) {
+        novoSelect.selectedIndex = 0;
       }
+
+      novoSelect.onchange = checar;
 
       checar();
     };
@@ -127,34 +117,35 @@ modelo.addEventListener('input', async () => {
   });
 
   sugestoes.style.display = lista.length ? 'block' : 'none';
-});
+};
 
 function checar() {
-  btnBuscar.disabled = !(marca.value && modelo.value && ano.value && motor.value);
+  const ano = document.getElementById('ano');
+
+  btnBuscar.disabled = !(
+    marca.value &&
+    modelo.value &&
+    motor.value &&
+    ano && ano.value
+  );
 }
 
 motor.onchange = checar;
-ano.onchange = checar;
 
 btnBuscar.onclick = () => {
-  resultado.innerText =
-`Marca: ${marcasData[marca.value]}
-Modelo: ${modelo.value}
-Ano: ${ano.value}
-Motor: ${motor.value}`;
+  const ano = document.getElementById('ano');
+
+  alert(`OK:
+${marcasData[marca.value]}
+${modelo.value}
+${ano.value}`);
 };
 
-tipoVeiculo.onchange = () => {
-  modelo.value = '';
-  ano.innerHTML = '';
-  ano.disabled = true;
-  carregarMarcas();
-};
+tipoVeiculo.onchange = carregarMarcas;
 
 marca.onchange = () => {
   modelo.value = '';
-  ano.innerHTML = '';
-  ano.disabled = true;
+  document.getElementById('anoContainer').innerHTML = '<select id="ano" disabled></select>';
 };
 
 carregarMarcas();
