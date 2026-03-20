@@ -8,16 +8,35 @@
 <style>
 body { font-family: Arial; background:#f4f4f4; }
 .container { max-width:900px; margin:auto; background:#fff; padding:20px; border-radius:10px; }
-input, select { width:100%; padding:10px; margin:8px 0; }
-.relative { position:relative; }
-.suggestions {
-  position:absolute; background:#fff; border:1px solid #ccc;
-  max-height:250px; overflow:auto; width:100%; display:none;
+
+input, select {
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  font-size:16px;
 }
-.suggestion-item { padding:6px; cursor:pointer; }
-.suggestion-item:hover { background:#007bff; color:#fff; }
-.status { font-size:14px; color:#555; margin-top:5px; }
-.error { color:red; }
+
+.relative { position:relative; }
+
+.suggestions {
+  position:absolute;
+  background:#fff;
+  border:1px solid #ccc;
+  max-height:200px;
+  overflow:auto;
+  width:100%;
+  display:none;
+}
+
+.suggestion-item {
+  padding:10px;
+  border-bottom:1px solid #eee;
+}
+
+.suggestion-item:active {
+  background:#007bff;
+  color:#fff;
+}
 </style>
 </head>
 
@@ -27,161 +46,117 @@ input, select { width:100%; padding:10px; margin:8px 0; }
 
 <h2>Consulta Veicular</h2>
 
-<div id="status" class="status"></div>
-
-<label>Tipo</label>
 <select id="tipo">
   <option value="carros">Carros</option>
   <option value="motos">Motos</option>
   <option value="caminhoes">Caminhões</option>
 </select>
 
-<label>Marca</label>
 <select id="marca"></select>
 
-<label>Modelo</label>
 <div class="relative">
-<input id="modelo" placeholder="Digite o modelo..." disabled>
+<input id="modelo" placeholder="Digite o modelo..." disabled autocomplete="off">
 <div id="sugestoes" class="suggestions"></div>
 </div>
 
-<label>Ano</label>
 <select id="ano" disabled></select>
 
 </div>
 
 <script>
-const tipoEl = document.getElementById('tipo');
-const marcaEl = document.getElementById('marca');
-const modeloEl = document.getElementById('modelo');
-const sugestoesEl = document.getElementById('sugestoes');
-const anoEl = document.getElementById('ano');
-const statusEl = document.getElementById('status');
+const tipo = document.getElementById('tipo');
+const marca = document.getElementById('marca');
+const modelo = document.getElementById('modelo');
+const sugestoes = document.getElementById('sugestoes');
+const ano = document.getElementById('ano');
 
 let modelos = [];
 
-function setStatus(msg, erro=false){
-  statusEl.innerText = msg;
-  statusEl.className = erro ? 'status error' : 'status';
-}
-
 // 🔥 MARCAS
-async function carregarMarcas() {
-  setStatus('Carregando marcas...');
-  marcaEl.innerHTML = '<option>Carregando...</option>';
+async function carregarMarcas(){
+  marca.innerHTML = '<option>Carregando...</option>';
 
-  try {
-    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipoEl.value}/marcas`);
+  const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas`);
+  const data = await res.json();
 
-    if (!res.ok) throw new Error("Erro HTTP");
+  marca.innerHTML = '<option value="">Selecione a marca</option>';
 
-    const data = await res.json();
-
-    marcaEl.innerHTML = '<option value="">Selecione</option>';
-
-    data.forEach(m => {
-      marcaEl.add(new Option(m.nome, m.codigo));
-    });
-
-    setStatus('Marcas carregadas');
-
-  } catch (e) {
-    console.error(e);
-    marcaEl.innerHTML = '<option>Erro</option>';
-    setStatus('Erro ao carregar marcas (internet ou API)', true);
-  }
+  data.forEach(m=>{
+    marca.add(new Option(m.nome, m.codigo));
+  });
 }
 
-// 🔥 MODELOS
-marcaEl.addEventListener('change', async () => {
-  modeloEl.disabled = true;
-  modeloEl.value = '';
-  anoEl.innerHTML = '';
-  anoEl.disabled = true;
+// 🔥 AO ESCOLHER MARCA
+marca.addEventListener('change', async ()=>{
+  modelo.value = '';
+  modelo.disabled = true;
+  sugestoes.style.display = 'none';
+  ano.innerHTML = '';
+  ano.disabled = true;
 
-  if (!marcaEl.value) return;
+  if(!marca.value) return;
 
-  setStatus('Carregando modelos...');
+  const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos`);
+  const data = await res.json();
 
-  try {
-    const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipoEl.value}/${marcaEl.value}/modelos`);
+  modelos = data.modelos || [];
 
-    if (!res.ok) throw new Error("Erro HTTP");
+  console.log("Modelos carregados:", modelos.length);
 
-    const data = await res.json();
-
-    modelos = data.modelos || [];
-
-    modeloEl.disabled = false;
-
-    setStatus('Digite o modelo');
-
-  } catch (e) {
-    console.error(e);
-    setStatus('Erro ao carregar modelos', true);
-  }
+  modelo.disabled = false;
+  modelo.focus(); // 🔥 força foco
 });
 
-// 🔥 AUTOCOMPLETE
-modeloEl.addEventListener('input', () => {
-  const termo = modeloEl.value.toLowerCase();
+// 🔥 AUTOCOMPLETE CORRIGIDO
+modelo.addEventListener('input', ()=>{
+  const termo = modelo.value.toLowerCase().trim();
 
-  const lista = modelos.filter(m =>
+  if(!termo){
+    sugestoes.style.display = 'none';
+    return;
+  }
+
+  const filtrados = modelos.filter(m =>
     m.nome.toLowerCase().includes(termo)
   );
 
-  sugestoesEl.innerHTML = '';
+  sugestoes.innerHTML = '';
 
-  lista.slice(0,20).forEach(m => {
+  filtrados.slice(0,15).forEach(m=>{
     const div = document.createElement('div');
     div.className = 'suggestion-item';
-    div.innerText = m.nome;
+    div.textContent = m.nome;
 
-    div.onclick = async () => {
-      modeloEl.value = m.nome;
-      sugestoesEl.style.display = 'none';
+    div.addEventListener('click', async ()=>{
+      modelo.value = m.nome;
+      sugestoes.style.display = 'none';
 
-      setStatus('Carregando anos...');
+      ano.innerHTML = '<option>Carregando...</option>';
 
-      try {
-        const res = await fetch(`https://parallelum.com.br/fipe/api/v1/${tipoEl.value}/${marcaEl.value}/${m.codigo}/anos`);
+      const res = await fetch(
+        `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos/${m.codigo}/anos`
+      );
 
-        if (!res.ok) throw new Error("Erro HTTP");
+      const anos = await res.json();
 
-        const anos = await res.json();
+      ano.innerHTML = '';
 
-        anoEl.innerHTML = '<option value="">Selecione</option>';
+      anos.forEach(a=>{
+        ano.add(new Option(a.nome, a.codigo));
+      });
 
-        anos.forEach(a => {
-          anoEl.add(new Option(a.nome, a.codigo));
-        });
+      ano.disabled = false;
+    });
 
-        anoEl.disabled = false;
-
-        setStatus('Anos carregados');
-
-      } catch (e) {
-        console.error(e);
-        setStatus('Erro ao carregar anos', true);
-      }
-    };
-
-    sugestoesEl.appendChild(div);
+    sugestoes.appendChild(div);
   });
 
-  sugestoesEl.style.display = lista.length ? 'block' : 'none';
+  sugestoes.style.display = filtrados.length ? 'block' : 'none';
 });
 
 // 🔄 TROCAR TIPO
-tipoEl.addEventListener('change', () => {
-  modeloEl.value = '';
-  modeloEl.disabled = true;
-  anoEl.innerHTML = '';
-  anoEl.disabled = true;
-  carregarMarcas();
-});
+tipo.addEventListener('change', carregarMarcas);
 
-// INICIAR
 carregarMarcas();
 </script>
 
