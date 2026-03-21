@@ -6,8 +6,18 @@
 <title>Consulta Veicular PRO</title>
 
 <style>
-body { font-family: Arial; background:#0f172a; color:#fff; margin:0; }
-.container { max-width:900px; margin:auto; padding:15px; }
+body {
+  font-family: Arial;
+  background:#0f172a;
+  color:#fff;
+  margin:0;
+}
+
+.container {
+  max-width:900px;
+  margin:auto;
+  padding:15px;
+}
 
 .card {
   background:#1e293b;
@@ -23,7 +33,10 @@ input, select, button {
   border:none;
 }
 
-button { background:#2563eb; color:#fff; }
+button {
+  background:#2563eb;
+  color:#fff;
+}
 
 .result-card {
   margin-top:15px;
@@ -38,7 +51,9 @@ button { background:#2563eb; color:#fff; }
   object-fit:cover;
 }
 
-.result-content { padding:15px; }
+.result-content {
+  padding:15px;
+}
 </style>
 </head>
 
@@ -58,7 +73,12 @@ button { background:#2563eb; color:#fff; }
 
 <select id="marca"></select>
 
+<div class="relative">
 <input id="modelo" placeholder="Digite o modelo..." disabled>
+<div id="sugestoes"></div>
+</div>
+
+<select id="ano" disabled></select>
 
 <select id="motor">
 <option value="">Motor</option>
@@ -87,6 +107,8 @@ button { background:#2563eb; color:#fff; }
 const tipo = document.getElementById('tipo');
 const marca = document.getElementById('marca');
 const modelo = document.getElementById('modelo');
+const sugestoes = document.getElementById('sugestoes');
+const ano = document.getElementById('ano');
 const resultado = document.getElementById('resultado');
 const motorEl = document.getElementById('motor');
 const marcaFiltro = document.getElementById('marcaFiltro');
@@ -133,34 +155,32 @@ marca.addEventListener('change', async ()=>{
   modelo.disabled=false;
 });
 
-// 🔥 BUSCA INTELIGENTE
-function buscarFiltro(modeloNome, motor, filtro){
-  const busca = modeloNome.toLowerCase();
+// 🔥 AUTOCOMPLETE
+modelo.addEventListener('input', ()=>{
+  const lista = modelos.filter(m =>
+    m.nome.toLowerCase().includes(modelo.value.toLowerCase())
+  );
 
-  for(const chave in banco){
-    const nomeBase = chave.split(" ")[0];
+  sugestoes.innerHTML='';
 
-    if(busca.includes(nomeBase) && chave.includes(motor)){
-      return banco[chave]?.[filtro];
-    }
-  }
+  lista.slice(0,10).forEach(m=>{
+    const div=document.createElement('div');
+    div.textContent=m.nome;
+    div.onclick=()=> modelo.value=m.nome;
+    sugestoes.appendChild(div);
+  });
+});
 
-  return null;
-}
-
-// 🔥 CONSULTA FINAL
+// 🔥 BUSCA FINAL
 document.getElementById('btnBuscar').onclick = ()=>{
 
-  const modeloNome = modelo.value;
+  const modeloNome = modelo.value.toLowerCase();
   const motor = motorEl.value;
   const filtro = marcaFiltro.value;
 
-  if(!modeloNome || !motor){
-    alert("Preencha tudo");
-    return;
-  }
+  const chave = modeloNome + " " + motor;
 
-  const dados = buscarFiltro(modeloNome, motor, filtro);
+  const dados = banco[chave]?.[filtro];
 
   if(!dados){
     alert("Filtro não encontrado no banco");
@@ -173,7 +193,7 @@ document.getElementById('btnBuscar').onclick = ()=>{
     <div class="result-card">
       <img src="${imagem}">
       <div class="result-content">
-        <p><b>${modeloNome}</b></p>
+        <p><b>${modeloNome.toUpperCase()}</b></p>
         <p>Óleo: ${dados.oleo}</p>
         <p>Ar: ${dados.ar}</p>
         <p>Combustível: ${dados.combustivel}</p>
@@ -184,6 +204,7 @@ document.getElementById('btnBuscar').onclick = ()=>{
 };
 
 tipo.addEventListener('change', carregarMarcas);
+
 carregarMarcas();
 </script>
 
