@@ -3,45 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta Veicular PRO</title>
+<title>Consulta Veicular</title>
 
 <style>
 
 body{
+margin:0;
 font-family:Arial;
 background:#000;
-color:#fff;
-margin:0;
+color:white;
 }
 
-.container{
-max-width:900px;
-margin:auto;
+/* TOPO */
+
+.topo{
 padding:15px;
-}
-
-h2{
 text-align:center;
-margin-bottom:20px;
+font-size:20px;
+font-weight:bold;
+background:#111;
 }
 
-/* CARD PRINCIPAL */
+/* CAIXA */
 
-.card{
-background:#2b2b2b;
+.box{
+background:#2c2c2c;
+margin:15px;
 padding:15px;
 border-radius:20px;
-margin-bottom:20px;
 }
+
+/* INPUT */
 
 input,select{
 width:100%;
 padding:14px;
-margin:8px 0;
-border-radius:12px;
+margin:6px 0;
 border:none;
+border-radius:10px;
 background:#3a3a3a;
-color:#fff;
+color:white;
 font-size:15px;
 }
 
@@ -49,46 +50,68 @@ font-size:15px;
 
 button{
 width:100%;
-padding:15px;
-border-radius:12px;
+padding:14px;
 border:none;
-background:linear-gradient(90deg,#0f9d6c,#18c58f);
-color:#fff;
+border-radius:10px;
+background:#16a36d;
+color:white;
 font-size:16px;
-cursor:pointer;
 font-weight:bold;
+}
+
+/* LISTA DE MARCAS */
+
+.marca-lista{
+margin:15px;
+}
+
+.marca-item{
+display:flex;
+align-items:center;
+gap:10px;
+background:#1c1c1c;
+padding:12px;
+border-radius:12px;
+margin-bottom:8px;
+cursor:pointer;
+}
+
+.marca-item img{
+width:35px;
+height:35px;
+object-fit:contain;
 }
 
 /* RESULTADOS */
 
-.result-card{
+.resultado{
+margin:15px;
+}
 
-background:#f1f1f1;
+.card{
+
+background:#f2f2f2;
 color:#000;
-border-radius:18px;
+
+border-radius:20px;
+
 padding:20px;
-margin-bottom:20px;
+
+margin-bottom:15px;
 
 }
 
-.result-card h3{
-margin:0 0 10px;
-}
-
-.result-card p{
-margin:4px 0;
-font-size:14px;
+.card h3{
+margin-top:0;
 }
 
 .visualizar{
 
-margin-top:15px;
-
-background:linear-gradient(90deg,#0f9d6c,#18c58f);
-
-border:none;
+background:#16a36d;
 
 color:white;
+
+border:none;
 
 padding:12px;
 
@@ -96,41 +119,9 @@ width:100%;
 
 border-radius:10px;
 
+margin-top:10px;
+
 font-weight:bold;
-
-cursor:pointer;
-
-}
-
-/* MARCAS */
-
-.marca-item{
-
-display:flex;
-
-align-items:center;
-
-gap:10px;
-
-padding:10px;
-
-background:#3a3a3a;
-
-border-radius:10px;
-
-margin:5px 0;
-
-cursor:pointer;
-
-}
-
-.marca-item img{
-
-width:35px;
-
-height:35px;
-
-object-fit:contain;
 
 }
 
@@ -139,43 +130,30 @@ object-fit:contain;
 
 <body>
 
-<div class="container">
+<div class="topo">
+AUTO ÓLEO - BUSQUE SEU VEÍCULO
+</div>
 
-<h2>🚗 Consulta Veicular</h2>
-
-<div class="card">
-
-<select id="tipo">
-<option value="carros">Carros</option>
-<option value="motos">Motos</option>
-<option value="caminhoes">Caminhões</option>
-</select>
+<div class="box">
 
 <select id="marca"></select>
 
 <input id="modelo" placeholder="Ex: Onix 1.0">
 
-<select id="ano"></select>
-
-<button id="btnBuscar">🔎 Pesquisar</button>
+<button onclick="buscar()">Pesquisar</button>
 
 </div>
 
-<div id="resultado"></div>
-
-</div>
+<div class="resultado" id="resultado"></div>
 
 <script>
 
-const tipo=document.getElementById("tipo");
-const marca=document.getElementById("marca");
-const modelo=document.getElementById("modelo");
-const ano=document.getElementById("ano");
+const marcaSelect=document.getElementById("marca");
 const resultado=document.getElementById("resultado");
 
 let modelos=[];
 
-/* MARCAS COMUNS */
+/* MARCAS PERMITIDAS */
 
 const marcasPermitidas=[
 "Chevrolet",
@@ -197,7 +175,7 @@ const marcasPermitidas=[
 "Suzuki"
 ];
 
-/* LOGOS DAS MARCAS */
+/* LOGOS */
 
 const logos={
 "Chevrolet":"https://logo.clearbit.com/chevrolet.com",
@@ -219,13 +197,15 @@ const logos={
 "Suzuki":"https://logo.clearbit.com/suzuki.com"
 };
 
+/* CARREGAR MARCAS */
+
 async function carregarMarcas(){
 
-const r=await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas`);
+const r=await fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas");
 
 const data=await r.json();
 
-marca.innerHTML="<option>Selecione a marca</option>";
+marcaSelect.innerHTML="<option>Selecione a marca</option>";
 
 data
 .filter(m =>
@@ -234,15 +214,21 @@ m.nome.toLowerCase().includes(p.toLowerCase())
 ))
 .forEach(m=>{
 
-marca.innerHTML+=`<option value="${m.codigo}">${m.nome}</option>`;
+marcaSelect.innerHTML+=`
+<option value="${m.codigo}">
+${m.nome}
+</option>
+`;
 
 });
 
 }
 
-marca.addEventListener("change",async()=>{
+/* BUSCAR MODELOS */
 
-const r=await fetch(`https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos`);
+marcaSelect.addEventListener("change",async()=>{
+
+const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelect.value}/modelos`);
 
 const data=await r.json();
 
@@ -250,21 +236,23 @@ modelos=data.modelos;
 
 });
 
-document.getElementById("btnBuscar").addEventListener("click",()=>{
+/* PESQUISAR */
+
+function buscar(){
 
 resultado.innerHTML="";
 
-const marcaNome=marca.options[marca.selectedIndex].text;
+const marcaNome=marcaSelect.options[marcaSelect.selectedIndex].text;
 
 const logo=Object.keys(logos).find(m=>marcaNome.includes(m));
 
 const logoUrl=logos[logo];
 
-modelos.slice(0,5).forEach(m=>{
+modelos.slice(0,6).forEach(m=>{
 
 resultado.innerHTML+=`
 
-<div class="result-card">
+<div class="card">
 
 <h3>${m.nome}</h3>
 
@@ -272,7 +260,9 @@ resultado.innerHTML+=`
 
 <p>Ano aproximado: 2010 até 2024</p>
 
-<button class="visualizar">VISUALIZAR</button>
+<button class="visualizar">
+VISUALIZAR
+</button>
 
 </div>
 
@@ -280,9 +270,7 @@ resultado.innerHTML+=`
 
 });
 
-});
-
-tipo.addEventListener("change",carregarMarcas);
+}
 
 carregarMarcas();
 
