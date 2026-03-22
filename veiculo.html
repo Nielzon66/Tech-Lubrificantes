@@ -7,67 +7,66 @@
 <style>
 
 body{
-font-family:Arial;
-background:#111;
-color:white;
+
 margin:0;
+font-family:Arial;
+background:#0b0b0b;
+color:white;
+
 }
 
 .topo{
 
-background:#0d0d0d;
-
+background:#111;
 padding:15px;
-
 display:flex;
-
 align-items:center;
-
-gap:10px;
 
 }
 
 .voltar{
 
-background:#16a36d;
-
+background:#1dbf73;
 border:none;
-
-padding:8px 15px;
-
+padding:8px 14px;
 border-radius:8px;
-
 color:white;
-
-cursor:pointer;
+margin-right:10px;
 
 }
 
 .container{
+
 padding:20px;
+
 }
 
-.carro{
+.card{
+
 background:white;
 color:black;
-border-radius:20px;
-padding:20px;
+border-radius:18px;
+padding:18px;
+
 }
 
-.carro img{
+.card img{
+
 width:100%;
-border-radius:15px;
+border-radius:12px;
+
 }
 
-.bloco{
-background:#1f1f1f;
-padding:15px;
+.info{
+
+background:#1b1b1b;
+padding:14px;
 border-radius:10px;
 margin-top:10px;
+
 }
 
 </style>
-
 </head>
 
 <body>
@@ -75,50 +74,46 @@ margin-top:10px;
 <div class="topo">
 
 <button class="voltar" onclick="voltar()">
-⬅ Voltar
+⬅
 </button>
+
+<div id="titulo"></div>
 
 </div>
 
 <div class="container">
 
-<div class="carro">
+<div class="card">
 
-<img src="https://source.unsplash.com/600x400/?car">
+<img src="https://source.unsplash.com/800x500/?car">
 
 <h2 id="nome"></h2>
 
 </div>
 
-<div class="bloco">
-Óleo recomendado: 5W30
-</div>
+<div class="info">Óleo recomendado: 5W30 Sintético</div>
 
-<div class="bloco">
-Capacidade: 3.5 litros
-</div>
+<div class="info">Capacidade: 3.5L</div>
 
-<div class="bloco">
-Filtro de óleo: WEGA WO123
-</div>
+<div class="info">Filtro de óleo: WEGA WO123</div>
 
-<div class="bloco">
-Filtro de ar: WEGA FA456
-</div>
+<div class="info">Filtro de ar: WEGA FA456</div>
 
 </div>
 
 <script>
 
-const dados=JSON.parse(localStorage.getItem("veiculo"));
+const dados=JSON.parse(localStorage.getItem("veiculo"))
 
 document.getElementById("nome").innerText=
+dados.marca+" "+dados.modelo
 
-dados.marca+" "+dados.modelo;
+document.getElementById("titulo").innerText=
+dados.marca
 
 function voltar(){
 
-window.history.back();
+window.history.back()
 
 }
 
