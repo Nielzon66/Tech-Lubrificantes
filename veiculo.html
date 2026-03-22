@@ -13,6 +13,36 @@ color:white;
 margin:0;
 }
 
+.topo{
+
+background:#0d0d0d;
+
+padding:15px;
+
+display:flex;
+
+align-items:center;
+
+gap:10px;
+
+}
+
+.voltar{
+
+background:#16a36d;
+
+border:none;
+
+padding:8px 15px;
+
+border-radius:8px;
+
+color:white;
+
+cursor:pointer;
+
+}
+
 .container{
 padding:20px;
 }
@@ -29,25 +59,11 @@ width:100%;
 border-radius:15px;
 }
 
-.info{
-margin-top:15px;
-}
-
 .bloco{
-
 background:#1f1f1f;
-
 padding:15px;
-
 border-radius:10px;
-
 margin-top:10px;
-
-}
-
-.titulo{
-font-weight:bold;
-margin-bottom:5px;
 }
 
 </style>
@@ -56,50 +72,38 @@ margin-bottom:5px;
 
 <body>
 
+<div class="topo">
+
+<button class="voltar" onclick="voltar()">
+⬅ Voltar
+</button>
+
+</div>
+
 <div class="container">
 
 <div class="carro">
 
-<img id="fotoCarro" src="https://source.unsplash.com/600x400/?car">
+<img src="https://source.unsplash.com/600x400/?car">
 
 <h2 id="nome"></h2>
 
 </div>
 
-<div class="info">
-
 <div class="bloco">
-
-<div class="titulo">Óleo Motor</div>
-
-5W30 Sintético
-
+Óleo recomendado: 5W30
 </div>
 
 <div class="bloco">
-
-<div class="titulo">Capacidade</div>
-
-3.5 Litros
-
+Capacidade: 3.5 litros
 </div>
 
 <div class="bloco">
-
-<div class="titulo">Filtro de Óleo</div>
-
-WEGA WO123
-
+Filtro de óleo: WEGA WO123
 </div>
 
 <div class="bloco">
-
-<div class="titulo">Filtro de Ar</div>
-
-WEGA FA456
-
-</div>
-
+Filtro de ar: WEGA FA456
 </div>
 
 </div>
@@ -111,6 +115,12 @@ const dados=JSON.parse(localStorage.getItem("veiculo"));
 document.getElementById("nome").innerText=
 
 dados.marca+" "+dados.modelo;
+
+function voltar(){
+
+window.history.back();
+
+}
 
 </script>
 
