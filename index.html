@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Consulta Veicular</title>
 
 <style>
@@ -21,9 +20,7 @@ margin:auto;
 padding:15px;
 }
 
-h2{
-text-align:center;
-}
+h2{text-align:center;}
 
 .card{
 background:#1e293b;
@@ -42,17 +39,6 @@ background:#0f172a;
 color:#fff;
 }
 
-button{
-width:100%;
-padding:14px;
-border-radius:10px;
-border:none;
-background:linear-gradient(45deg,#2563eb,#3b82f6);
-color:#fff;
-font-size:16px;
-cursor:pointer;
-}
-
 .marca-lista{
 max-height:200px;
 overflow:auto;
@@ -67,27 +53,16 @@ border-bottom:1px solid #334155;
 cursor:pointer;
 }
 
-.marca-item img{
-width:30px;
-}
+.marca-item img{width:30px;}
 
-.marca-item:hover{
-background:#2563eb;
-}
-
-.veiculos{
-display:flex;
-flex-direction:column;
-gap:10px;
-margin-top:10px;
-}
+.marca-item:hover{background:#2563eb;}
 
 .veiculo-card{
 background:#1e293b;
 padding:15px;
 border-radius:10px;
+margin-top:8px;
 cursor:pointer;
-transition:.2s;
 }
 
 .veiculo-card:hover{
@@ -111,24 +86,15 @@ object-fit:cover;
 padding:15px;
 }
 
-.voltar{
+button{
 margin-top:10px;
-background:#334155;
-}
-
-.loader{
-border:4px solid #334155;
-border-top:4px solid #3b82f6;
-border-radius:50%;
-width:40px;
-height:40px;
-animation:spin 1s linear infinite;
-margin:auto;
-}
-
-@keyframes spin{
-0%{transform:rotate(0)}
-100%{transform:rotate(360deg)}
+padding:12px;
+width:100%;
+border:none;
+border-radius:8px;
+background:#2563eb;
+color:#fff;
+cursor:pointer;
 }
 
 </style>
@@ -138,17 +104,19 @@ margin:auto;
 
 <div class="container">
 
-<h2>🚗 Consulta Veicular</h2>
+<h2>Consulta Veicular</h2>
 
 <div class="card">
 
-<input id="buscaMarca" placeholder="Digite a marca...">
+<input id="buscaMarca" placeholder="Digite a marca">
 
 <div id="listaMarcas" class="marca-lista"></div>
 
-<input id="buscaModelo" placeholder="Digite o modelo..." disabled>
+<input id="buscaModelo" placeholder="Digite o modelo" disabled>
 
-<div id="veiculos" class="veiculos"></div>
+<select id="ano" disabled></select>
+
+<div id="veiculos"></div>
 
 </div>
 
@@ -158,20 +126,51 @@ margin:auto;
 
 <script>
 
-const buscaMarca = document.getElementById("buscaMarca")
-const listaMarcas = document.getElementById("listaMarcas")
-const buscaModelo = document.getElementById("buscaModelo")
-const veiculos = document.getElementById("veiculos")
-const paginaVeiculo = document.getElementById("paginaVeiculo")
+const marcasPermitidas=[
+"Chevrolet",
+"Volkswagen",
+"Fiat",
+"Toyota",
+"Honda",
+"Hyundai",
+"Renault",
+"Nissan",
+"Jeep",
+"Peugeot",
+"Citroen",
+"Ford",
+"Mitsubishi",
+"Kia",
+"Chery",
+"Suzuki",
+"Ram"
+]
+
+const oleos={
+"onix":{oleo:"5W30",litros:"3.5L"},
+"gol":{oleo:"5W40",litros:"3.5L"},
+"hb20":{oleo:"5W30",litros:"3.6L"},
+"corolla":{oleo:"0W20",litros:"4.2L"},
+"civic":{oleo:"0W20",litros:"3.7L"},
+"uno":{oleo:"15W40",litros:"3.2L"},
+"palio":{oleo:"15W40",litros:"3.2L"},
+"ka":{oleo:"5W20",litros:"4L"}
+}
 
 let marcas=[]
 let modelos=[]
-let marcaSelecionada=null
+let marcaSelecionada
+let modeloSelecionado
 
 async function carregarMarcas(){
 
 const r=await fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas")
-marcas=await r.json()
+let data=await r.json()
+
+marcas=data.filter(m=>
+marcasPermitidas.some(p=>
+m.nome.toLowerCase().includes(p.toLowerCase())
+))
 
 mostrarMarcas(marcas)
 
@@ -201,7 +200,7 @@ listaMarcas.appendChild(div)
 
 }
 
-buscaMarca.addEventListener("input",()=>{
+buscaMarca.oninput=()=>{
 
 const termo=buscaMarca.value.toLowerCase()
 
@@ -211,7 +210,7 @@ m.nome.toLowerCase().includes(termo)
 
 mostrarMarcas(filtrado)
 
-})
+}
 
 async function selecionarMarca(m){
 
@@ -221,18 +220,14 @@ listaMarcas.innerHTML=""
 
 buscaModelo.disabled=false
 
-veiculos.innerHTML='<div class="loader"></div>'
-
 const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${m.codigo}/modelos`)
 const data=await r.json()
 
 modelos=data.modelos
 
-veiculos.innerHTML=""
-
 }
 
-buscaModelo.addEventListener("input",()=>{
+buscaModelo.oninput=()=>{
 
 const termo=buscaModelo.value.toLowerCase()
 
@@ -246,32 +241,55 @@ lista.slice(0,10).forEach(m=>{
 
 const div=document.createElement("div")
 div.className="veiculo-card"
+div.innerHTML=`🚗 ${m.nome}`
 
-div.innerHTML=`
-🚗 ${m.nome}
-`
-
-div.onclick=()=>abrirVeiculo(m)
+div.onclick=()=>selecionarModelo(m)
 
 veiculos.appendChild(div)
 
 })
 
-})
+}
 
-async function abrirVeiculo(m){
+async function selecionarModelo(m){
 
-veiculos.innerHTML='<div class="loader"></div>'
+modeloSelecionado=m
 
 const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelecionada.codigo}/modelos/${m.codigo}/anos`)
 const anos=await r.json()
 
-const ano=anos[0]
+ano.innerHTML=""
 
-const r2=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelecionada.codigo}/modelos/${m.codigo}/anos/${ano.codigo}`)
-const info=await r2.json()
+anos.forEach(a=>{
 
-const imagem=`https://tse1.mm.bing.net/th?q=${marcaSelecionada.nome}+${m.nome}+carro`
+const op=document.createElement("option")
+op.value=a.codigo
+op.text=a.nome
+
+ano.appendChild(op)
+
+})
+
+ano.disabled=false
+
+}
+
+ano.onchange=async()=>{
+
+const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelecionada.codigo}/modelos/${modeloSelecionado.codigo}/anos/${ano.value}`)
+const info=await r.json()
+
+abrirVeiculo(info)
+
+}
+
+function abrirVeiculo(info){
+
+let chave=modeloSelecionado.nome.toLowerCase()
+
+let dados=oleos[chave] || {oleo:"Consultar manual",litros:"-"}
+
+const imagem=`https://tse1.mm.bing.net/th?q=${marcaSelecionada.nome}+${modeloSelecionado.nome}+carro`
 
 paginaVeiculo.innerHTML=`
 
@@ -281,14 +299,18 @@ paginaVeiculo.innerHTML=`
 
 <div class="result-content">
 
-<h3>${marcaSelecionada.nome} ${m.nome}</h3>
+<h3>${marcaSelecionada.nome} ${modeloSelecionado.nome}</h3>
 
 <p>Ano: ${info.AnoModelo}</p>
 <p>Combustível: ${info.Combustivel}</p>
-<p>Código FIPE: ${info.CodigoFipe}</p>
-<p>Valor médio: ${info.Valor}</p>
 
-<button class="voltar" onclick="voltar()">⬅ Voltar</button>
+<hr>
+
+<p><b>Óleo recomendado</b></p>
+<p>Tipo: ${dados.oleo}</p>
+<p>Quantidade: ${dados.litros}</p>
+
+<button onclick="voltar()">Voltar</button>
 
 </div>
 
@@ -296,14 +318,11 @@ paginaVeiculo.innerHTML=`
 
 `
 
-veiculos.innerHTML=""
-
 }
 
 function voltar(){
 
 paginaVeiculo.innerHTML=""
-veiculos.innerHTML=""
 
 }
 
