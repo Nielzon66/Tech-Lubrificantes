@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Auto Consulta Veicular</title>
+
+<title>Tabela de Óleo e Filtros</title>
 
 <style>
 
@@ -16,24 +17,24 @@ color:white;
 
 /* TOPO */
 
-header{
-background:#0f0f0f;
-padding:18px;
+.topo{
+background:#0d0d0d;
+padding:20px;
 text-align:center;
-font-size:20px;
+font-size:22px;
 font-weight:bold;
-border-bottom:1px solid #222;
+border-bottom:2px solid #16a36d;
 }
 
-/* CARD DE BUSCA */
+/* BUSCA */
 
-.search-box{
+.busca{
 
 margin:20px;
 
-background:#1c1c1c;
+background:#2a2a2a;
 
-padding:20px;
+padding:15px;
 
 border-radius:20px;
 
@@ -49,9 +50,9 @@ border:none;
 
 border-radius:12px;
 
-margin-top:10px;
+margin:6px 0;
 
-background:#2c2c2c;
+background:#3b3b3b;
 
 color:white;
 
@@ -59,11 +60,11 @@ font-size:15px;
 
 }
 
+/* BOTÃO */
+
 button{
 
 width:100%;
-
-margin-top:12px;
 
 padding:14px;
 
@@ -71,13 +72,13 @@ border:none;
 
 border-radius:12px;
 
-background:linear-gradient(90deg,#00a870,#15d69c);
+background:#16a36d;
 
 color:white;
 
-font-size:16px;
-
 font-weight:bold;
+
+font-size:16px;
 
 cursor:pointer;
 
@@ -85,17 +86,19 @@ cursor:pointer;
 
 /* RESULTADOS */
 
-.results{
+.lista{
 
 padding:15px;
 
 }
 
-.vehicle-card{
+/* CARD */
 
-background:white;
+.card{
 
-color:black;
+background:#f1f1f1;
+
+color:#000;
 
 border-radius:20px;
 
@@ -105,7 +108,7 @@ margin-bottom:15px;
 
 }
 
-.vehicle-header{
+.card-header{
 
 display:flex;
 
@@ -117,7 +120,7 @@ margin-bottom:10px;
 
 }
 
-.vehicle-header img{
+.card-header img{
 
 width:40px;
 
@@ -127,15 +130,17 @@ object-fit:contain;
 
 }
 
-.vehicle-card h3{
+.card h3{
 
-margin:5px 0;
+margin:0;
 
 }
 
 .visualizar{
 
-background:linear-gradient(90deg,#00a870,#15d69c);
+margin-top:12px;
+
+background:#16a36d;
 
 border:none;
 
@@ -149,54 +154,122 @@ color:white;
 
 font-weight:bold;
 
-margin-top:10px;
-
 cursor:pointer;
 
 }
 
-/* DETALHES */
+/* MODAL */
 
-.details{
+.modal{
+
+position:fixed;
+
+top:0;
+
+left:0;
+
+width:100%;
+
+height:100%;
+
+background:rgba(0,0,0,0.8);
+
+display:none;
+
+align-items:center;
+
+justify-content:center;
+
+}
+
+.modal-box{
+
+background:white;
+
+color:black;
+
+padding:25px;
+
+border-radius:20px;
+
+width:90%;
+
+max-width:400px;
+
+}
+
+.modal-box h2{
+
+margin-top:0;
+
+}
+
+.fechar{
 
 margin-top:10px;
 
-font-size:14px;
+background:#c0392b;
 
-line-height:22px;
+color:white;
+
+border:none;
+
+padding:10px;
+
+border-radius:10px;
+
+width:100%;
 
 }
 
 </style>
+
 </head>
 
 <body>
 
-<header>
-AUTO CONSULTA VEICULAR
-</header>
+<div class="topo">
+TABELA DE LUBRIFICANTES
+</div>
 
-<div class="search-box">
+<div class="busca">
 
 <select id="marca"></select>
 
-<input id="modelo" placeholder="Ex: Onix">
+<input id="modelo" placeholder="Digite o modelo (ex: Onix)">
 
-<button onclick="buscar()">Buscar veículo</button>
+<button onclick="buscar()">Buscar Veículo</button>
 
 </div>
 
-<div class="results" id="resultado"></div>
+<div class="lista" id="lista"></div>
+
+<div class="modal" id="modal">
+
+<div class="modal-box">
+
+<h2 id="titulo"></h2>
+
+<p>Óleo recomendado: 5W-30</p>
+<p>Capacidade média: 4 litros</p>
+<p>Troca de óleo: 10.000 km</p>
+<p>Troca de filtros: 15.000 km</p>
+
+<button class="fechar" onclick="fechar()">Fechar</button>
+
+</div>
+
+</div>
 
 <script>
 
-const marcaSelect=document.getElementById("marca");
+const marca=document.getElementById("marca");
 const modeloInput=document.getElementById("modelo");
-const resultado=document.getElementById("resultado");
+const lista=document.getElementById("lista");
 
 let modelos=[];
 
-/* MARCAS BRASIL */
+/* MARCAS */
 
 const marcasPermitidas=[
 "Chevrolet",
@@ -221,23 +294,25 @@ const marcasPermitidas=[
 /* LOGOS */
 
 const logos={
-"Chevrolet":"https://upload.wikimedia.org/wikipedia/commons/4/4e/Chevrolet_logo.png",
-"Volkswagen":"https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.png",
-"Fiat":"https://upload.wikimedia.org/wikipedia/commons/8/8d/Fiat_logo.svg",
-"Toyota":"https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.png",
-"Honda":"https://upload.wikimedia.org/wikipedia/commons/7/7b/Honda_logo.svg",
-"Hyundai":"https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg",
-"Renault":"https://upload.wikimedia.org/wikipedia/commons/b/b7/Renault_2021_Text.svg",
-"Nissan":"https://upload.wikimedia.org/wikipedia/commons/8/8c/Nissan_logo.png",
-"Jeep":"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg",
-"Peugeot":"https://upload.wikimedia.org/wikipedia/commons/7/75/Peugeot_Logo.svg",
-"Citroen":"https://upload.wikimedia.org/wikipedia/commons/7/7b/Citro%C3%ABn_logo.svg",
-"Ford":"https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg",
-"Mitsubishi":"https://upload.wikimedia.org/wikipedia/commons/5/5a/Mitsubishi_logo.svg",
-"Kia":"https://upload.wikimedia.org/wikipedia/commons/4/4d/Kia_logo3.svg",
-"Chery":"https://upload.wikimedia.org/wikipedia/commons/2/2e/Chery_logo.svg",
-"Ram":"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ram_Trucks_logo.svg",
-"Suzuki":"https://upload.wikimedia.org/wikipedia/commons/1/12/Suzuki_logo_2.svg"
+
+Chevrolet:"https://upload.wikimedia.org/wikipedia/commons/4/4e/Chevrolet_logo.png",
+Volkswagen:"https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.png",
+Fiat:"https://upload.wikimedia.org/wikipedia/commons/8/8d/Fiat_logo.svg",
+Toyota:"https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.png",
+Honda:"https://upload.wikimedia.org/wikipedia/commons/7/7b/Honda_logo.svg",
+Hyundai:"https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg",
+Renault:"https://upload.wikimedia.org/wikipedia/commons/b/b7/Renault_2021_Text.svg",
+Nissan:"https://upload.wikimedia.org/wikipedia/commons/8/8c/Nissan_logo.png",
+Jeep:"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg",
+Peugeot:"https://upload.wikimedia.org/wikipedia/commons/7/75/Peugeot_Logo.svg",
+Citroen:"https://upload.wikimedia.org/wikipedia/commons/7/7b/Citro%C3%ABn_logo.svg",
+Ford:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg",
+Mitsubishi:"https://upload.wikimedia.org/wikipedia/commons/5/5a/Mitsubishi_logo.svg",
+Kia:"https://upload.wikimedia.org/wikipedia/commons/4/4d/Kia_logo3.svg",
+Chery:"https://upload.wikimedia.org/wikipedia/commons/2/2e/Chery_logo.svg",
+Ram:"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ram_Trucks_logo.svg",
+Suzuki:"https://upload.wikimedia.org/wikipedia/commons/1/12/Suzuki_logo_2.svg"
+
 };
 
 /* CARREGAR MARCAS */
@@ -248,7 +323,7 @@ const r=await fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas");
 
 const data=await r.json();
 
-marcaSelect.innerHTML="<option>Selecione a montadora</option>";
+marca.innerHTML="<option>Selecione a montadora</option>";
 
 data
 .filter(m =>
@@ -257,11 +332,7 @@ m.nome.toLowerCase().includes(p.toLowerCase())
 ))
 .forEach(m=>{
 
-marcaSelect.innerHTML+=`
-<option value="${m.codigo}">
-${m.nome}
-</option>
-`;
+marca.innerHTML+=`<option value="${m.codigo}">${m.nome}</option>`;
 
 });
 
@@ -269,9 +340,9 @@ ${m.nome}
 
 /* CARREGAR MODELOS */
 
-marcaSelect.addEventListener("change",async()=>{
+marca.addEventListener("change",async()=>{
 
-const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelect.value}/modelos`);
+const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marca.value}/modelos`);
 
 const data=await r.json();
 
@@ -279,50 +350,39 @@ modelos=data.modelos;
 
 });
 
-/* BUSCA */
+/* BUSCAR */
 
 function buscar(){
 
-resultado.innerHTML="";
+lista.innerHTML="";
 
 const termo=modeloInput.value.toLowerCase();
 
-const marcaNome=marcaSelect.options[marcaSelect.selectedIndex].text;
-
-const lista=modelos.filter(m=>m.nome.toLowerCase().includes(termo));
+const marcaNome=marca.options[marca.selectedIndex].text;
 
 const logo=Object.keys(logos).find(m=>marcaNome.includes(m));
 
 const logoUrl=logos[logo];
 
-lista.slice(0,6).forEach(m=>{
+const resultados=modelos.filter(m=>m.nome.toLowerCase().includes(termo));
 
-resultado.innerHTML+=`
+resultados.slice(0,10).forEach(m=>{
 
-<div class="vehicle-card">
+lista.innerHTML+=`
 
-<div class="vehicle-header">
+<div class="card">
+
+<div class="card-header">
 
 <img src="${logoUrl}">
-
 <b>${marcaNome}</b>
 
 </div>
 
 <h3>${m.nome}</h3>
 
-<div class="details">
-
-Motor: consultar manual do fabricante<br>
-Troca de óleo média: 10.000 km<br>
-Filtro de óleo: consultar aplicação
-
-</div>
-
-<button class="visualizar" onclick="alert('Abrir ficha completa do veículo')">
-
+<button class="visualizar" onclick="abrir('${m.nome}')">
 VISUALIZAR
-
 </button>
 
 </div>
@@ -330,6 +390,22 @@ VISUALIZAR
 `;
 
 });
+
+}
+
+/* MODAL */
+
+function abrir(nome){
+
+document.getElementById("modal").style.display="flex";
+
+document.getElementById("titulo").innerText=nome;
+
+}
+
+function fechar(){
+
+document.getElementById("modal").style.display="none";
 
 }
 
