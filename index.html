@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Tabela de Lubrificantes</title>
+<title>Busca de Veículos</title>
 
 <style>
 
@@ -15,6 +15,8 @@ background:#050505;
 color:white;
 }
 
+/* TOPO */
+
 .topo{
 background:#0d0d0d;
 padding:20px;
@@ -23,6 +25,8 @@ font-size:22px;
 font-weight:bold;
 border-bottom:2px solid #16a36d;
 }
+
+/* BUSCA */
 
 .busca{
 margin:20px;
@@ -54,15 +58,38 @@ font-size:16px;
 cursor:pointer;
 }
 
-.lista{
-padding:15px;
+.marcaCampo{
+background:#3b3b3b;
+padding:14px;
+border-radius:12px;
+cursor:pointer;
+}
+
+/* MODAL MARCAS */
+
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.9);
+display:none;
+overflow:auto;
+}
+
+.modalContent{
+background:#111;
+margin-top:60px;
+border-radius:20px;
+padding:20px;
 }
 
 .marcaItem{
 display:flex;
 align-items:center;
-gap:10px;
-padding:10px;
+gap:12px;
+padding:12px;
 border-bottom:1px solid #333;
 cursor:pointer;
 }
@@ -71,9 +98,15 @@ cursor:pointer;
 width:35px;
 }
 
+/* RESULTADOS */
+
+.lista{
+padding:15px;
+}
+
 .card{
 background:#f1f1f1;
-color:#000;
+color:black;
 border-radius:20px;
 padding:20px;
 margin-bottom:15px;
@@ -102,7 +135,9 @@ BUSCAR VEÍCULO
 
 <div class="busca">
 
-<div id="listaMarcas"></div>
+<div class="marcaCampo" onclick="abrirMarcas()" id="marcaSelecionada">
+Selecionar Montadora
+</div>
 
 <input id="modelo" placeholder="Digite o modelo ex: Onix">
 
@@ -111,6 +146,10 @@ BUSCAR VEÍCULO
 </div>
 
 <div class="lista" id="resultado"></div>
+
+<div class="modal" id="modalMarcas">
+<div class="modalContent" id="listaMarcas"></div>
+</div>
 
 <script>
 
@@ -130,8 +169,7 @@ Honda:"https://upload.wikimedia.org/wikipedia/commons/7/7b/Honda_logo.svg",
 Hyundai:"https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg",
 Renault:"https://upload.wikimedia.org/wikipedia/commons/b/b7/Renault_2021_Text.svg",
 Ford:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg",
-Jeep:"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg",
-Nissan:"https://upload.wikimedia.org/wikipedia/commons/8/8c/Nissan_logo.png"
+Jeep:"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg"
 
 };
 
@@ -163,9 +201,19 @@ ${m.nome}
 
 }
 
+function abrirMarcas(){
+
+document.getElementById("modalMarcas").style.display="block";
+
+}
+
 async function selecionarMarca(codigo,nome){
 
 marcaSelecionada={codigo,nome};
+
+document.getElementById("marcaSelecionada").innerText=nome;
+
+document.getElementById("modalMarcas").style.display="none";
 
 const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${codigo}/modelos`);
 
