@@ -14,8 +14,6 @@ background:#000;
 color:white;
 }
 
-/* TOPO */
-
 .topo{
 padding:15px;
 text-align:center;
@@ -24,16 +22,12 @@ font-weight:bold;
 background:#111;
 }
 
-/* CAIXA */
-
 .box{
 background:#2c2c2c;
 margin:15px;
 padding:15px;
 border-radius:20px;
 }
-
-/* INPUT */
 
 input,select{
 width:100%;
@@ -46,8 +40,6 @@ color:white;
 font-size:15px;
 }
 
-/* BOTÃO */
-
 button{
 width:100%;
 padding:14px;
@@ -57,32 +49,8 @@ background:#16a36d;
 color:white;
 font-size:16px;
 font-weight:bold;
-}
-
-/* LISTA DE MARCAS */
-
-.marca-lista{
-margin:15px;
-}
-
-.marca-item{
-display:flex;
-align-items:center;
-gap:10px;
-background:#1c1c1c;
-padding:12px;
-border-radius:12px;
-margin-bottom:8px;
 cursor:pointer;
 }
-
-.marca-item img{
-width:35px;
-height:35px;
-object-fit:contain;
-}
-
-/* RESULTADOS */
 
 .resultado{
 margin:15px;
@@ -101,8 +69,17 @@ margin-bottom:15px;
 
 }
 
-.card h3{
-margin-top:0;
+.card-header{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
+}
+
+.card-header img{
+width:40px;
+height:40px;
+object-fit:contain;
 }
 
 .visualizar{
@@ -123,6 +100,8 @@ margin-top:10px;
 
 font-weight:bold;
 
+cursor:pointer;
+
 }
 
 </style>
@@ -138,7 +117,7 @@ AUTO ÓLEO - BUSQUE SEU VEÍCULO
 
 <select id="marca"></select>
 
-<input id="modelo" placeholder="Ex: Onix 1.0">
+<input id="modelo" placeholder="Ex: Onix">
 
 <button onclick="buscar()">Pesquisar</button>
 
@@ -149,11 +128,12 @@ AUTO ÓLEO - BUSQUE SEU VEÍCULO
 <script>
 
 const marcaSelect=document.getElementById("marca");
+const modeloInput=document.getElementById("modelo");
 const resultado=document.getElementById("resultado");
 
 let modelos=[];
 
-/* MARCAS PERMITIDAS */
+/* MARCAS */
 
 const marcasPermitidas=[
 "Chevrolet",
@@ -178,31 +158,28 @@ const marcasPermitidas=[
 /* LOGOS */
 
 const logos={
-"Chevrolet":"https://logo.clearbit.com/chevrolet.com",
-"Volkswagen":"https://logo.clearbit.com/vw.com",
-"Fiat":"https://logo.clearbit.com/fiat.com",
-"Toyota":"https://logo.clearbit.com/toyota.com",
-"Honda":"https://logo.clearbit.com/honda.com",
-"Hyundai":"https://logo.clearbit.com/hyundai.com",
-"Renault":"https://logo.clearbit.com/renault.com",
-"Nissan":"https://logo.clearbit.com/nissan.com",
-"Jeep":"https://logo.clearbit.com/jeep.com",
-"Peugeot":"https://logo.clearbit.com/peugeot.com",
-"Citroen":"https://logo.clearbit.com/citroen.com",
-"Ford":"https://logo.clearbit.com/ford.com",
-"Mitsubishi":"https://logo.clearbit.com/mitsubishi-motors.com",
-"Kia":"https://logo.clearbit.com/kia.com",
-"Chery":"https://logo.clearbit.com/cheryinternational.com",
-"Ram":"https://logo.clearbit.com/ramtrucks.com",
-"Suzuki":"https://logo.clearbit.com/suzuki.com"
+"Chevrolet":"https://upload.wikimedia.org/wikipedia/commons/4/4e/Chevrolet_logo.png",
+"Volkswagen":"https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.png",
+"Fiat":"https://upload.wikimedia.org/wikipedia/commons/8/8d/Fiat_logo.svg",
+"Toyota":"https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.png",
+"Honda":"https://upload.wikimedia.org/wikipedia/commons/7/7b/Honda_logo.svg",
+"Hyundai":"https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg",
+"Renault":"https://upload.wikimedia.org/wikipedia/commons/b/b7/Renault_2021_Text.svg",
+"Nissan":"https://upload.wikimedia.org/wikipedia/commons/8/8c/Nissan_logo.png",
+"Jeep":"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg",
+"Peugeot":"https://upload.wikimedia.org/wikipedia/commons/7/75/Peugeot_Logo.svg",
+"Citroen":"https://upload.wikimedia.org/wikipedia/commons/7/7b/Citro%C3%ABn_logo.svg",
+"Ford":"https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg",
+"Mitsubishi":"https://upload.wikimedia.org/wikipedia/commons/5/5a/Mitsubishi_logo.svg",
+"Kia":"https://upload.wikimedia.org/wikipedia/commons/4/4d/Kia_logo3.svg",
+"Chery":"https://upload.wikimedia.org/wikipedia/commons/2/2e/Chery_logo.svg",
+"Ram":"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ram_Trucks_logo.svg",
+"Suzuki":"https://upload.wikimedia.org/wikipedia/commons/1/12/Suzuki_logo_2.svg"
 };
-
-/* CARREGAR MARCAS */
 
 async function carregarMarcas(){
 
 const r=await fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas");
-
 const data=await r.json();
 
 marcaSelect.innerHTML="<option>Selecione a marca</option>";
@@ -224,7 +201,7 @@ ${m.nome}
 
 }
 
-/* BUSCAR MODELOS */
+/* CARREGAR MODELOS */
 
 marcaSelect.addEventListener("change",async()=>{
 
@@ -236,7 +213,7 @@ modelos=data.modelos;
 
 });
 
-/* PESQUISAR */
+/* PESQUISA */
 
 function buscar(){
 
@@ -244,23 +221,33 @@ resultado.innerHTML="";
 
 const marcaNome=marcaSelect.options[marcaSelect.selectedIndex].text;
 
+const termo=modeloInput.value.toLowerCase();
+
+const lista=modelos.filter(m=>m.nome.toLowerCase().includes(termo));
+
 const logo=Object.keys(logos).find(m=>marcaNome.includes(m));
 
 const logoUrl=logos[logo];
 
-modelos.slice(0,6).forEach(m=>{
+lista.slice(0,8).forEach(m=>{
 
 resultado.innerHTML+=`
 
 <div class="card">
 
+<div class="card-header">
+
+<img src="${logoUrl}">
+
+<b>${marcaNome}</b>
+
+</div>
+
 <h3>${m.nome}</h3>
 
-<p>${marcaNome}</p>
+<p>Ano disponível via tabela FIPE</p>
 
-<p>Ano aproximado: 2010 até 2024</p>
-
-<button class="visualizar">
+<button class="visualizar" onclick="visualizar('${m.nome}')">
 VISUALIZAR
 </button>
 
@@ -269,6 +256,14 @@ VISUALIZAR
 `;
 
 });
+
+}
+
+/* DETALHES */
+
+function visualizar(nome){
+
+alert("Detalhes do veículo: "+nome);
 
 }
 
