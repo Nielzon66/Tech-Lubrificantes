@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+font-family:Arial;
+background:#111;
+color:white;
+margin:0;
+}
+
+.container{
+padding:20px;
+}
+
+.carro{
+background:white;
+color:black;
+border-radius:20px;
+padding:20px;
+}
+
+.carro img{
+width:100%;
+border-radius:15px;
+}
+
+.info{
+margin-top:15px;
+}
+
+.bloco{
+
+background:#1f1f1f;
+
+padding:15px;
+
+border-radius:10px;
+
+margin-top:10px;
+
+}
+
+.titulo{
+font-weight:bold;
+margin-bottom:5px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="carro">
+
+<img id="fotoCarro" src="https://source.unsplash.com/600x400/?car">
+
+<h2 id="nome"></h2>
+
+</div>
+
+<div class="info">
+
+<div class="bloco">
+
+<div class="titulo">Óleo Motor</div>
+
+5W30 Sintético
+
+</div>
+
+<div class="bloco">
+
+<div class="titulo">Capacidade</div>
+
+3.5 Litros
+
+</div>
+
+<div class="bloco">
+
+<div class="titulo">Filtro de Óleo</div>
+
+WEGA WO123
+
+</div>
+
+<div class="bloco">
+
+<div class="titulo">Filtro de Ar</div>
+
+WEGA FA456
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const dados=JSON.parse(localStorage.getItem("veiculo"));
+
+document.getElementById("nome").innerText=
+
+dados.marca+" "+dados.modelo;
+
+</script>
+
+</body>
+</html>
