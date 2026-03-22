@@ -11,61 +11,59 @@
 body{
 margin:0;
 font-family:Arial;
-background:#050505;
+background:#0b0b0b;
 color:white;
 }
 
 /* TOPO */
 
 .topo{
-background:#0d0d0d;
-padding:20px;
+background:#111;
+padding:18px;
 text-align:center;
-font-size:22px;
+font-size:20px;
 font-weight:bold;
-border-bottom:2px solid #16a36d;
+border-bottom:2px solid #1dbf73;
 }
 
-/* BUSCA */
+/* CAIXA BUSCA */
 
 .busca{
 margin:20px;
-background:#2a2a2a;
+background:#1c1c1c;
 padding:15px;
-border-radius:20px;
+border-radius:16px;
+}
+
+.campo{
+background:#2c2c2c;
+padding:14px;
+border-radius:10px;
+margin-bottom:10px;
+cursor:pointer;
 }
 
 input{
 width:100%;
 padding:14px;
 border:none;
-border-radius:12px;
-margin:6px 0;
-background:#3b3b3b;
+border-radius:10px;
+background:#2c2c2c;
 color:white;
-font-size:15px;
+margin-bottom:10px;
 }
 
 button{
 width:100%;
 padding:14px;
 border:none;
-border-radius:12px;
-background:#16a36d;
+border-radius:10px;
+background:#1dbf73;
 color:white;
 font-weight:bold;
-font-size:16px;
-cursor:pointer;
 }
 
-.marcaCampo{
-background:#3b3b3b;
-padding:14px;
-border-radius:12px;
-cursor:pointer;
-}
-
-/* MODAL MARCAS */
+/* MODAL */
 
 .modal{
 position:fixed;
@@ -73,69 +71,90 @@ top:0;
 left:0;
 width:100%;
 height:100%;
-background:rgba(0,0,0,0.9);
+background:#000000e8;
 display:none;
 overflow:auto;
 }
 
 .modalContent{
-background:#111;
-margin-top:60px;
-border-radius:20px;
 padding:20px;
 }
 
 .marcaItem{
+
 display:flex;
 align-items:center;
 gap:12px;
-padding:12px;
+padding:14px;
 border-bottom:1px solid #333;
 cursor:pointer;
+
+}
+
+.marcaItem:hover{
+
+background:#1b1b1b;
+
 }
 
 .marcaItem img{
-width:35px;
+
+width:32px;
+height:32px;
+object-fit:contain;
+
 }
 
 /* RESULTADOS */
 
 .lista{
+
 padding:15px;
+
 }
 
 .card{
-background:#f1f1f1;
+
+background:white;
 color:black;
-border-radius:20px;
-padding:20px;
-margin-bottom:15px;
+border-radius:16px;
+padding:18px;
+margin-bottom:14px;
+
 }
 
-.visualizar{
-margin-top:10px;
-background:#16a36d;
+.modelo{
+
+font-size:17px;
+font-weight:bold;
+
+}
+
+.btn{
+
+margin-top:12px;
+background:#1dbf73;
 border:none;
 padding:12px;
 width:100%;
 border-radius:10px;
 color:white;
 font-weight:bold;
+
 }
 
 </style>
-
 </head>
 
 <body>
 
 <div class="topo">
-BUSCAR VEÍCULO
+Buscar Veículo
 </div>
 
 <div class="busca">
 
-<div class="marcaCampo" onclick="abrirMarcas()" id="marcaSelecionada">
+<div class="campo" onclick="abrirMarcas()" id="marcaCampo">
 Selecionar Montadora
 </div>
 
@@ -153,101 +172,120 @@ Selecionar Montadora
 
 <script>
 
-const listaMarcas=document.getElementById("listaMarcas");
-const resultado=document.getElementById("resultado");
+const listaMarcas=document.getElementById("listaMarcas")
+const resultado=document.getElementById("resultado")
 
-let marcaSelecionada=null;
-let modelos=[];
+let marcaSelecionada=null
+let modelos=[]
+
+/* LOGOS CONHECIDAS */
 
 const logos={
 
 Chevrolet:"https://upload.wikimedia.org/wikipedia/commons/4/4e/Chevrolet_logo.png",
-Volkswagen:"https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.png",
 Fiat:"https://upload.wikimedia.org/wikipedia/commons/8/8d/Fiat_logo.svg",
+Volkswagen:"https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.png",
 Toyota:"https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.png",
 Honda:"https://upload.wikimedia.org/wikipedia/commons/7/7b/Honda_logo.svg",
 Hyundai:"https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg",
 Renault:"https://upload.wikimedia.org/wikipedia/commons/b/b7/Renault_2021_Text.svg",
 Ford:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg",
-Jeep:"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg"
+Jeep:"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg",
+Nissan:"https://upload.wikimedia.org/wikipedia/commons/8/8c/Nissan_logo.png",
+Kia:"https://upload.wikimedia.org/wikipedia/commons/4/4d/Kia_logo3.svg",
+Peugeot:"https://upload.wikimedia.org/wikipedia/commons/7/75/Peugeot_Logo.svg"
 
-};
+}
+
+/* ICONE PADRAO */
+
+const logoPadrao="https://cdn-icons-png.flaticon.com/512/743/743131.png"
+
+/* CARREGAR MARCAS */
 
 async function carregarMarcas(){
 
-const r=await fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas");
-
-const data=await r.json();
+const r=await fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas")
+const data=await r.json()
 
 data.forEach(m=>{
 
-const logo=Object.keys(logos).find(l=>m.nome.includes(l));
+let logo=logoPadrao
 
-if(!logo) return;
+Object.keys(logos).forEach(l=>{
+
+if(m.nome.includes(l)) logo=logos[l]
+
+})
 
 listaMarcas.innerHTML+=`
 
 <div class="marcaItem" onclick="selecionarMarca('${m.codigo}','${m.nome}')">
 
-<img src="${logos[logo]}">
+<img src="${logo}">
 
 ${m.nome}
 
 </div>
 
-`;
+`
 
-});
+})
 
 }
 
 function abrirMarcas(){
 
-document.getElementById("modalMarcas").style.display="block";
+document.getElementById("modalMarcas").style.display="block"
 
 }
+
+/* SELECIONAR MARCA */
 
 async function selecionarMarca(codigo,nome){
 
-marcaSelecionada={codigo,nome};
+marcaSelecionada={codigo,nome}
 
-document.getElementById("marcaSelecionada").innerText=nome;
+document.getElementById("marcaCampo").innerText=nome
 
-document.getElementById("modalMarcas").style.display="none";
+document.getElementById("modalMarcas").style.display="none"
 
-const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${codigo}/modelos`);
+const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${codigo}/modelos`)
+const data=await r.json()
 
-const data=await r.json();
-
-modelos=data.modelos;
+modelos=data.modelos
 
 }
 
+/* BUSCAR */
+
 function buscar(){
 
-resultado.innerHTML="";
+resultado.innerHTML=""
 
-const termo=document.getElementById("modelo").value.toLowerCase();
+const termo=document.getElementById("modelo").value.toLowerCase()
 
-const filtrados=modelos.filter(m=>m.nome.toLowerCase().includes(termo));
+const filtrados=modelos.filter(m=>m.nome.toLowerCase().includes(termo))
 
-filtrados.slice(0,10).forEach(m=>{
+filtrados.slice(0,12).forEach(m=>{
 
 resultado.innerHTML+=`
 
 <div class="card">
 
-<b>${m.nome}</b>
+<div class="modelo">${m.nome}</div>
 
-<button class="visualizar" onclick="abrir('${m.nome}')">
-VISUALIZAR
+<button class="btn" onclick="abrir('${m.nome}')">
+
+Visualizar
+
 </button>
 
 </div>
 
-`;
+`
 
-});
+})
 
 }
 
@@ -258,13 +296,13 @@ localStorage.setItem("veiculo",JSON.stringify({
 modelo:nome,
 marca:marcaSelecionada.nome
 
-}));
+}))
 
-window.location="veiculo.html";
+window.location="veiculo.html"
 
 }
 
-carregarMarcas();
+carregarMarcas()
 
 </script>
 
