@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Tabela de Óleo e Filtros</title>
+<title>Tabela de Lubrificantes</title>
 
 <style>
 
@@ -15,8 +15,6 @@ background:#050505;
 color:white;
 }
 
-/* TOPO */
-
 .topo{
 background:#0d0d0d;
 padding:20px;
@@ -26,200 +24,70 @@ font-weight:bold;
 border-bottom:2px solid #16a36d;
 }
 
-/* BUSCA */
-
 .busca{
-
 margin:20px;
-
 background:#2a2a2a;
-
 padding:15px;
-
 border-radius:20px;
-
 }
 
-select,input{
-
+input{
 width:100%;
-
 padding:14px;
-
 border:none;
-
 border-radius:12px;
-
 margin:6px 0;
-
 background:#3b3b3b;
-
 color:white;
-
 font-size:15px;
-
 }
-
-/* BOTÃO */
 
 button{
-
 width:100%;
-
 padding:14px;
-
 border:none;
-
 border-radius:12px;
-
 background:#16a36d;
-
 color:white;
-
 font-weight:bold;
-
 font-size:16px;
-
 cursor:pointer;
-
 }
-
-/* RESULTADOS */
 
 .lista{
-
 padding:15px;
-
 }
 
-/* CARD */
+.marcaItem{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px;
+border-bottom:1px solid #333;
+cursor:pointer;
+}
+
+.marcaItem img{
+width:35px;
+}
 
 .card{
-
 background:#f1f1f1;
-
 color:#000;
-
 border-radius:20px;
-
 padding:20px;
-
 margin-bottom:15px;
-
-}
-
-.card-header{
-
-display:flex;
-
-align-items:center;
-
-gap:10px;
-
-margin-bottom:10px;
-
-}
-
-.card-header img{
-
-width:40px;
-
-height:40px;
-
-object-fit:contain;
-
-}
-
-.card h3{
-
-margin:0;
-
 }
 
 .visualizar{
-
-margin-top:12px;
-
-background:#16a36d;
-
-border:none;
-
-padding:12px;
-
-width:100%;
-
-border-radius:10px;
-
-color:white;
-
-font-weight:bold;
-
-cursor:pointer;
-
-}
-
-/* MODAL */
-
-.modal{
-
-position:fixed;
-
-top:0;
-
-left:0;
-
-width:100%;
-
-height:100%;
-
-background:rgba(0,0,0,0.8);
-
-display:none;
-
-align-items:center;
-
-justify-content:center;
-
-}
-
-.modal-box{
-
-background:white;
-
-color:black;
-
-padding:25px;
-
-border-radius:20px;
-
-width:90%;
-
-max-width:400px;
-
-}
-
-.modal-box h2{
-
-margin-top:0;
-
-}
-
-.fechar{
-
 margin-top:10px;
-
-background:#c0392b;
-
-color:white;
-
+background:#16a36d;
 border:none;
-
-padding:10px;
-
-border-radius:10px;
-
+padding:12px;
 width:100%;
-
+border-radius:10px;
+color:white;
+font-weight:bold;
 }
 
 </style>
@@ -229,69 +97,28 @@ width:100%;
 <body>
 
 <div class="topo">
-TABELA DE LUBRIFICANTES
+BUSCAR VEÍCULO
 </div>
 
 <div class="busca">
 
-<select id="marca"></select>
+<div id="listaMarcas"></div>
 
-<input id="modelo" placeholder="Digite o modelo (ex: Onix)">
+<input id="modelo" placeholder="Digite o modelo ex: Onix">
 
-<button onclick="buscar()">Buscar Veículo</button>
-
-</div>
-
-<div class="lista" id="lista"></div>
-
-<div class="modal" id="modal">
-
-<div class="modal-box">
-
-<h2 id="titulo"></h2>
-
-<p>Óleo recomendado: 5W-30</p>
-<p>Capacidade média: 4 litros</p>
-<p>Troca de óleo: 10.000 km</p>
-<p>Troca de filtros: 15.000 km</p>
-
-<button class="fechar" onclick="fechar()">Fechar</button>
+<button onclick="buscar()">Pesquisar</button>
 
 </div>
 
-</div>
+<div class="lista" id="resultado"></div>
 
 <script>
 
-const marca=document.getElementById("marca");
-const modeloInput=document.getElementById("modelo");
-const lista=document.getElementById("lista");
+const listaMarcas=document.getElementById("listaMarcas");
+const resultado=document.getElementById("resultado");
 
+let marcaSelecionada=null;
 let modelos=[];
-
-/* MARCAS */
-
-const marcasPermitidas=[
-"Chevrolet",
-"Volkswagen",
-"Fiat",
-"Toyota",
-"Honda",
-"Hyundai",
-"Renault",
-"Nissan",
-"Jeep",
-"Peugeot",
-"Citroen",
-"Ford",
-"Mitsubishi",
-"Kia",
-"Chery",
-"Ram",
-"Suzuki"
-];
-
-/* LOGOS */
 
 const logos={
 
@@ -302,20 +129,11 @@ Toyota:"https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.png",
 Honda:"https://upload.wikimedia.org/wikipedia/commons/7/7b/Honda_logo.svg",
 Hyundai:"https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg",
 Renault:"https://upload.wikimedia.org/wikipedia/commons/b/b7/Renault_2021_Text.svg",
-Nissan:"https://upload.wikimedia.org/wikipedia/commons/8/8c/Nissan_logo.png",
-Jeep:"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg",
-Peugeot:"https://upload.wikimedia.org/wikipedia/commons/7/75/Peugeot_Logo.svg",
-Citroen:"https://upload.wikimedia.org/wikipedia/commons/7/7b/Citro%C3%ABn_logo.svg",
 Ford:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg",
-Mitsubishi:"https://upload.wikimedia.org/wikipedia/commons/5/5a/Mitsubishi_logo.svg",
-Kia:"https://upload.wikimedia.org/wikipedia/commons/4/4d/Kia_logo3.svg",
-Chery:"https://upload.wikimedia.org/wikipedia/commons/2/2e/Chery_logo.svg",
-Ram:"https://upload.wikimedia.org/wikipedia/commons/7/7d/Ram_Trucks_logo.svg",
-Suzuki:"https://upload.wikimedia.org/wikipedia/commons/1/12/Suzuki_logo_2.svg"
+Jeep:"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg",
+Nissan:"https://upload.wikimedia.org/wikipedia/commons/8/8c/Nissan_logo.png"
 
 };
-
-/* CARREGAR MARCAS */
 
 async function carregarMarcas(){
 
@@ -323,63 +141,55 @@ const r=await fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas");
 
 const data=await r.json();
 
-marca.innerHTML="<option>Selecione a montadora</option>";
+data.forEach(m=>{
 
-data
-.filter(m =>
-marcasPermitidas.some(p =>
-m.nome.toLowerCase().includes(p.toLowerCase())
-))
-.forEach(m=>{
+const logo=Object.keys(logos).find(l=>m.nome.includes(l));
 
-marca.innerHTML+=`<option value="${m.codigo}">${m.nome}</option>`;
+if(!logo) return;
+
+listaMarcas.innerHTML+=`
+
+<div class="marcaItem" onclick="selecionarMarca('${m.codigo}','${m.nome}')">
+
+<img src="${logos[logo]}">
+
+${m.nome}
+
+</div>
+
+`;
 
 });
 
 }
 
-/* CARREGAR MODELOS */
+async function selecionarMarca(codigo,nome){
 
-marca.addEventListener("change",async()=>{
+marcaSelecionada={codigo,nome};
 
-const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marca.value}/modelos`);
+const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${codigo}/modelos`);
 
 const data=await r.json();
 
 modelos=data.modelos;
 
-});
-
-/* BUSCAR */
+}
 
 function buscar(){
 
-lista.innerHTML="";
+resultado.innerHTML="";
 
-const termo=modeloInput.value.toLowerCase();
+const termo=document.getElementById("modelo").value.toLowerCase();
 
-const marcaNome=marca.options[marca.selectedIndex].text;
+const filtrados=modelos.filter(m=>m.nome.toLowerCase().includes(termo));
 
-const logo=Object.keys(logos).find(m=>marcaNome.includes(m));
+filtrados.slice(0,10).forEach(m=>{
 
-const logoUrl=logos[logo];
-
-const resultados=modelos.filter(m=>m.nome.toLowerCase().includes(termo));
-
-resultados.slice(0,10).forEach(m=>{
-
-lista.innerHTML+=`
+resultado.innerHTML+=`
 
 <div class="card">
 
-<div class="card-header">
-
-<img src="${logoUrl}">
-<b>${marcaNome}</b>
-
-</div>
-
-<h3>${m.nome}</h3>
+<b>${m.nome}</b>
 
 <button class="visualizar" onclick="abrir('${m.nome}')">
 VISUALIZAR
@@ -393,19 +203,16 @@ VISUALIZAR
 
 }
 
-/* MODAL */
-
 function abrir(nome){
 
-document.getElementById("modal").style.display="flex";
+localStorage.setItem("veiculo",JSON.stringify({
 
-document.getElementById("titulo").innerText=nome;
+modelo:nome,
+marca:marcaSelecionada.nome
 
-}
+}));
 
-function fechar(){
-
-document.getElementById("modal").style.display="none";
+window.location="veiculo.html";
 
 }
 
