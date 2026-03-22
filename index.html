@@ -4,143 +4,131 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Busca de Veículos</title>
+<title>Consulta Veicular</title>
 
 <style>
 
 body{
-margin:0;
 font-family:Arial;
-background:#0b0b0b;
-color:white;
+background:#0f172a;
+color:#fff;
+margin:0;
 }
 
-/* TOPO */
-
-.topo{
-background:#111;
-padding:18px;
-text-align:center;
-font-size:20px;
-font-weight:bold;
-border-bottom:2px solid #1dbf73;
-}
-
-/* CAIXA BUSCA */
-
-.busca{
-margin:20px;
-background:#1c1c1c;
+.container{
+max-width:900px;
+margin:auto;
 padding:15px;
-border-radius:16px;
 }
 
-.campo{
-background:#2c2c2c;
-padding:14px;
-border-radius:10px;
+h2{
+text-align:center;
+}
+
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:12px;
 margin-bottom:10px;
-cursor:pointer;
 }
 
 input{
 width:100%;
-padding:14px;
+padding:12px;
+margin:8px 0;
+border-radius:8px;
 border:none;
-border-radius:10px;
-background:#2c2c2c;
-color:white;
-margin-bottom:10px;
+background:#0f172a;
+color:#fff;
 }
 
 button{
 width:100%;
 padding:14px;
-border:none;
 border-radius:10px;
-background:#1dbf73;
-color:white;
-font-weight:bold;
+border:none;
+background:linear-gradient(45deg,#2563eb,#3b82f6);
+color:#fff;
+font-size:16px;
+cursor:pointer;
 }
 
-/* MODAL */
-
-.modal{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#000000e8;
-display:none;
+.marca-lista{
+max-height:200px;
 overflow:auto;
 }
 
-.modalContent{
-padding:20px;
-}
-
-.marcaItem{
-
+.marca-item{
 display:flex;
 align-items:center;
-gap:12px;
-padding:14px;
-border-bottom:1px solid #333;
+gap:10px;
+padding:10px;
+border-bottom:1px solid #334155;
 cursor:pointer;
-
 }
 
-.marcaItem:hover{
-
-background:#1b1b1b;
-
+.marca-item img{
+width:30px;
 }
 
-.marcaItem img{
-
-width:32px;
-height:32px;
-object-fit:contain;
-
+.marca-item:hover{
+background:#2563eb;
 }
 
-/* RESULTADOS */
+.veiculos{
+display:flex;
+flex-direction:column;
+gap:10px;
+margin-top:10px;
+}
 
-.lista{
-
+.veiculo-card{
+background:#1e293b;
 padding:15px;
-
-}
-
-.card{
-
-background:white;
-color:black;
-border-radius:16px;
-padding:18px;
-margin-bottom:14px;
-
-}
-
-.modelo{
-
-font-size:17px;
-font-weight:bold;
-
-}
-
-.btn{
-
-margin-top:12px;
-background:#1dbf73;
-border:none;
-padding:12px;
-width:100%;
 border-radius:10px;
-color:white;
-font-weight:bold;
+cursor:pointer;
+transition:.2s;
+}
 
+.veiculo-card:hover{
+background:#2563eb;
+}
+
+.result-card{
+margin-top:15px;
+background:#1e293b;
+border-radius:12px;
+overflow:hidden;
+}
+
+.result-card img{
+width:100%;
+height:220px;
+object-fit:cover;
+}
+
+.result-content{
+padding:15px;
+}
+
+.voltar{
+margin-top:10px;
+background:#334155;
+}
+
+.loader{
+border:4px solid #334155;
+border-top:4px solid #3b82f6;
+border-radius:50%;
+width:40px;
+height:40px;
+animation:spin 1s linear infinite;
+margin:auto;
+}
+
+@keyframes spin{
+0%{transform:rotate(0)}
+100%{transform:rotate(360deg)}
 }
 
 </style>
@@ -148,157 +136,174 @@ font-weight:bold;
 
 <body>
 
-<div class="topo">
-Buscar Veículo
+<div class="container">
+
+<h2>🚗 Consulta Veicular</h2>
+
+<div class="card">
+
+<input id="buscaMarca" placeholder="Digite a marca...">
+
+<div id="listaMarcas" class="marca-lista"></div>
+
+<input id="buscaModelo" placeholder="Digite o modelo..." disabled>
+
+<div id="veiculos" class="veiculos"></div>
+
 </div>
 
-<div class="busca">
+<div id="paginaVeiculo"></div>
 
-<div class="campo" onclick="abrirMarcas()" id="marcaCampo">
-Selecionar Montadora
-</div>
-
-<input id="modelo" placeholder="Digite o modelo ex: Onix">
-
-<button onclick="buscar()">Pesquisar</button>
-
-</div>
-
-<div class="lista" id="resultado"></div>
-
-<div class="modal" id="modalMarcas">
-<div class="modalContent" id="listaMarcas"></div>
 </div>
 
 <script>
 
-const listaMarcas=document.getElementById("listaMarcas")
-const resultado=document.getElementById("resultado")
+const buscaMarca = document.getElementById("buscaMarca")
+const listaMarcas = document.getElementById("listaMarcas")
+const buscaModelo = document.getElementById("buscaModelo")
+const veiculos = document.getElementById("veiculos")
+const paginaVeiculo = document.getElementById("paginaVeiculo")
 
-let marcaSelecionada=null
+let marcas=[]
 let modelos=[]
-
-/* LOGOS CONHECIDAS */
-
-const logos={
-
-Chevrolet:"https://upload.wikimedia.org/wikipedia/commons/4/4e/Chevrolet_logo.png",
-Fiat:"https://upload.wikimedia.org/wikipedia/commons/8/8d/Fiat_logo.svg",
-Volkswagen:"https://upload.wikimedia.org/wikipedia/commons/6/6d/Volkswagen_logo_2019.png",
-Toyota:"https://upload.wikimedia.org/wikipedia/commons/9/9d/Toyota_carlogo.png",
-Honda:"https://upload.wikimedia.org/wikipedia/commons/7/7b/Honda_logo.svg",
-Hyundai:"https://upload.wikimedia.org/wikipedia/commons/4/44/Hyundai_Motor_Company_logo.svg",
-Renault:"https://upload.wikimedia.org/wikipedia/commons/b/b7/Renault_2021_Text.svg",
-Ford:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Ford_logo_flat.svg",
-Jeep:"https://upload.wikimedia.org/wikipedia/commons/9/9b/Jeep_logo.svg",
-Nissan:"https://upload.wikimedia.org/wikipedia/commons/8/8c/Nissan_logo.png",
-Kia:"https://upload.wikimedia.org/wikipedia/commons/4/4d/Kia_logo3.svg",
-Peugeot:"https://upload.wikimedia.org/wikipedia/commons/7/75/Peugeot_Logo.svg"
-
-}
-
-/* ICONE PADRAO */
-
-const logoPadrao="https://cdn-icons-png.flaticon.com/512/743/743131.png"
-
-/* CARREGAR MARCAS */
+let marcaSelecionada=null
 
 async function carregarMarcas(){
 
 const r=await fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas")
-const data=await r.json()
+marcas=await r.json()
 
-data.forEach(m=>{
+mostrarMarcas(marcas)
 
-let logo=logoPadrao
+}
 
-Object.keys(logos).forEach(l=>{
+function mostrarMarcas(lista){
 
-if(m.nome.includes(l)) logo=logos[l]
+listaMarcas.innerHTML=""
 
-})
+lista.forEach(m=>{
 
-listaMarcas.innerHTML+=`
+const logo=`https://tse2.mm.bing.net/th?q=${m.nome}+logo`
 
-<div class="marcaItem" onclick="selecionarMarca('${m.codigo}','${m.nome}')">
+const div=document.createElement("div")
+div.className="marca-item"
 
+div.innerHTML=`
 <img src="${logo}">
-
-${m.nome}
-
-</div>
-
+<span>${m.nome}</span>
 `
 
+div.onclick=()=>selecionarMarca(m)
+
+listaMarcas.appendChild(div)
+
 })
 
 }
 
-function abrirMarcas(){
+buscaMarca.addEventListener("input",()=>{
 
-document.getElementById("modalMarcas").style.display="block"
+const termo=buscaMarca.value.toLowerCase()
 
-}
+const filtrado=marcas.filter(m=>
+m.nome.toLowerCase().includes(termo)
+)
 
-/* SELECIONAR MARCA */
+mostrarMarcas(filtrado)
 
-async function selecionarMarca(codigo,nome){
+})
 
-marcaSelecionada={codigo,nome}
+async function selecionarMarca(m){
 
-document.getElementById("marcaCampo").innerText=nome
+marcaSelecionada=m
+buscaMarca.value=m.nome
+listaMarcas.innerHTML=""
 
-document.getElementById("modalMarcas").style.display="none"
+buscaModelo.disabled=false
 
-const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${codigo}/modelos`)
+veiculos.innerHTML='<div class="loader"></div>'
+
+const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${m.codigo}/modelos`)
 const data=await r.json()
 
 modelos=data.modelos
 
+veiculos.innerHTML=""
+
 }
 
-/* BUSCAR */
+buscaModelo.addEventListener("input",()=>{
 
-function buscar(){
+const termo=buscaModelo.value.toLowerCase()
 
-resultado.innerHTML=""
+const lista=modelos.filter(m=>
+m.nome.toLowerCase().includes(termo)
+)
 
-const termo=document.getElementById("modelo").value.toLowerCase()
+veiculos.innerHTML=""
 
-const filtrados=modelos.filter(m=>m.nome.toLowerCase().includes(termo))
+lista.slice(0,10).forEach(m=>{
 
-filtrados.slice(0,12).forEach(m=>{
+const div=document.createElement("div")
+div.className="veiculo-card"
 
-resultado.innerHTML+=`
+div.innerHTML=`
+🚗 ${m.nome}
+`
 
-<div class="card">
+div.onclick=()=>abrirVeiculo(m)
 
-<div class="modelo">${m.nome}</div>
+veiculos.appendChild(div)
 
-<button class="btn" onclick="abrir('${m.nome}')">
+})
 
-Visualizar
+})
 
-</button>
+async function abrirVeiculo(m){
+
+veiculos.innerHTML='<div class="loader"></div>'
+
+const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelecionada.codigo}/modelos/${m.codigo}/anos`)
+const anos=await r.json()
+
+const ano=anos[0]
+
+const r2=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelecionada.codigo}/modelos/${m.codigo}/anos/${ano.codigo}`)
+const info=await r2.json()
+
+const imagem=`https://tse1.mm.bing.net/th?q=${marcaSelecionada.nome}+${m.nome}+carro`
+
+paginaVeiculo.innerHTML=`
+
+<div class="result-card">
+
+<img src="${imagem}">
+
+<div class="result-content">
+
+<h3>${marcaSelecionada.nome} ${m.nome}</h3>
+
+<p>Ano: ${info.AnoModelo}</p>
+<p>Combustível: ${info.Combustivel}</p>
+<p>Código FIPE: ${info.CodigoFipe}</p>
+<p>Valor médio: ${info.Valor}</p>
+
+<button class="voltar" onclick="voltar()">⬅ Voltar</button>
+
+</div>
 
 </div>
 
 `
 
-})
+veiculos.innerHTML=""
 
 }
 
-function abrir(nome){
+function voltar(){
 
-localStorage.setItem("veiculo",JSON.stringify({
-
-modelo:nome,
-marca:marcaSelecionada.nome
-
-}))
-
-window.location="veiculo.html"
+paginaVeiculo.innerHTML=""
+veiculos.innerHTML=""
 
 }
 
