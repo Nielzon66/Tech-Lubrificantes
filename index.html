@@ -643,19 +643,397 @@ const OLEO_DB = {
   'ninja':      { '1.0':   { v:'10W-40', t:'Sintético Moto', l:'1,6L', api:'MA2', int:'5.000 km' } },
 };
 
-// ── BANCO DE FILTROS ──────────────────────────────────────
+// ── BANCO DE FILTROS COMPLETO ─────────────────────────────
+// Campos: o=óleo, ar=ar motor, cb=cabine, fc=combustível
+// freio = fluido de freio (DOT)
+// Marcas: wega, tecfil, fram, mann
 const FILTROS_DB = {
-  'gol':     { wega:{o:'WO-348',ar:'FA-1234',cb:'AKX-890'}, tecfil:{o:'PSL55',ar:'ARL4142',cb:'ACP123'}, fram:{o:'PH6607',ar:'CA9997',cb:'CF10134'}, mann:{o:'W712/95',ar:'C13103',cb:'FP25100'} },
-  'onix':    { wega:{o:'WO-351',ar:'FA-1900',cb:'AKX-111'}, tecfil:{o:'PSL128',ar:'ARL8822',cb:'ACP210'}, fram:{o:'PH10060',ar:'CA12000',cb:'CF11000'}, mann:{o:'W719/45',ar:'C29130/2',cb:'FP3337'} },
-  'tracker': { wega:{o:'WO-351',ar:'FA-1900',cb:'AKX-111'}, tecfil:{o:'PSL128',ar:'ARL8822',cb:'ACP210'}, fram:{o:'PH10060',ar:'CA12000',cb:'CF11000'}, mann:{o:'W719/45',ar:'C29130/2',cb:'FP3337'} },
-  'cruze':   { wega:{o:'WO-351',ar:'FA-1540',cb:'AKX-320'}, tecfil:{o:'PSL144',ar:'ARL9900',cb:'ACP300'}, fram:{o:'PH10060',ar:'CA11809',cb:'CF10285'}, mann:{o:'W719/45',ar:'C2698',cb:'FP27009'} },
-  'polo':    { wega:{o:'WO-540',ar:'FA-2200',cb:'AKX-555'}, tecfil:{o:'PSL200',ar:'ARL9000',cb:'ACP400'}, fram:{o:'PH10060',ar:'CA9809',cb:'CF10285'}, mann:{o:'W712/94',ar:'C3397',cb:'FP25100'} },
-  'virtus':  { wega:{o:'WO-540',ar:'FA-2200',cb:'AKX-555'}, tecfil:{o:'PSL200',ar:'ARL9000',cb:'ACP400'}, fram:{o:'PH10060',ar:'CA9809',cb:'CF10285'}, mann:{o:'W712/94',ar:'C3397',cb:'FP25100'} },
-  'hb20':    { wega:{o:'WO-480',ar:'FA-2020',cb:'AKX-222'}, tecfil:{o:'PSL159',ar:'ARL9900',cb:'ACP300'}, fram:{o:'PH10900',ar:'CA13000',cb:'CF12000'}, mann:{o:'W712/94',ar:'C29030/2',cb:'FP2939'} },
-  'civic':   { wega:{o:'WO-121',ar:'FA-777', cb:'AKX-333'}, tecfil:{o:'PSL147',ar:'ARL4158',cb:'ACP456'}, fram:{o:'PH7317', ar:'CA10242',cb:'CF10285'}, mann:{o:'W712/75',ar:'C34007',cb:'FP2357'} },
-  'corolla': { wega:{o:'WO-150',ar:'FA-888', cb:'AKX-444'}, tecfil:{o:'PSL56', ar:'ARL2208',cb:'ACP789'}, fram:{o:'PH4967', ar:'CA4309', cb:'CF9845'}, mann:{o:'W712/75',ar:'C23440',cb:'FP2939'} },
-  'hilux':   { wega:{o:'WD-777',ar:'FA-3900',cb:'AKX-900'}, tecfil:{o:'PSL300',ar:'ARL5500',cb:'ACP500'}, fram:{o:'PH9800', ar:'CA10546',cb:'CF10285'}, mann:{o:'W950/25',ar:'C35154',cb:'FP2357'} },
-  'compass': { wega:{o:'WO-480',ar:'FA-2100',cb:'AKX-600'}, tecfil:{o:'PSL160',ar:'ARL5400',cb:'ACP501'}, fram:{o:'PH10060',ar:'CA11809',cb:'CF11002'}, mann:{o:'W712/94',ar:'C3397',cb:'FP25100'} },
+
+  // ── CHEVROLET ────────────────────────────────────────────
+  'onix': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-351',  ar:'WA-198',    cb:'AKX-111',  fc:'WFC-501'  },
+    tecfil: { o:'PSL128',  ar:'ARL8822',   cb:'ACP210',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W719/45', ar:'C29130/2',  cb:'FP3337',   fc:'WK8'      },
+  },
+  'tracker': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-351',  ar:'WA-198',    cb:'AKX-111',  fc:'WFC-501'  },
+    tecfil: { o:'PSL128',  ar:'ARL8822',   cb:'ACP210',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W719/45', ar:'C29130/2',  cb:'FP3337',   fc:'WK8'      },
+  },
+  'cruze': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-351',  ar:'WA-154',    cb:'AKX-320',  fc:'WFC-501'  },
+    tecfil: { o:'PSL144',  ar:'ARL9100',   cb:'ACP300',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA11809',   cb:'CF10285',  fc:'G10500'   },
+    mann:   { o:'W719/45', ar:'C2698',     cb:'FP27009',  fc:'WK8'      },
+  },
+  'spin': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-351',  ar:'WA-198',    cb:'AKX-111',  fc:'WFC-501'  },
+    tecfil: { o:'PSL128',  ar:'ARL8822',   cb:'ACP210',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W719/45', ar:'C29130/2',  cb:'FP3337',   fc:'WK8'      },
+  },
+  's10': {
+    freio: 'DOT 3',
+    wega:   { o:'WD-700',  ar:'WA-390',    cb:'AKX-900',  fc:'WFC-799'  },
+    tecfil: { o:'PSL300',  ar:'ARL5500',   cb:'ACP500',   fc:'PCL-800'  },
+    fram:   { o:'PH9800',  ar:'CA10546',   cb:'CF10285',  fc:'PS10260'  },
+    mann:   { o:'W950/25', ar:'C35154',    cb:'FP2357',   fc:'WK8157'   },
+  },
+  'trailblazer': {
+    freio: 'DOT 3',
+    wega:   { o:'WD-700',  ar:'WA-390',    cb:'AKX-900',  fc:'WFC-799'  },
+    tecfil: { o:'PSL300',  ar:'ARL5500',   cb:'ACP500',   fc:'PCL-800'  },
+    fram:   { o:'PH9800',  ar:'CA10546',   cb:'CF10285',  fc:'PS10260'  },
+    mann:   { o:'W950/25', ar:'C35154',    cb:'FP2357',   fc:'WK8157'   },
+  },
+  'montana': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-351',  ar:'WA-198',    cb:'AKX-111',  fc:'WFC-501'  },
+    tecfil: { o:'PSL128',  ar:'ARL8822',   cb:'ACP210',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W719/45', ar:'C29130/2',  cb:'FP3337',   fc:'WK8'      },
+  },
+
+  // ── VOLKSWAGEN ───────────────────────────────────────────
+  'gol': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-348',  ar:'WA-050',    cb:'AKX-890',  fc:'WFC-501'  },
+    tecfil: { o:'PSL55',   ar:'ARL4142',   cb:'ACP123',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA9997',    cb:'CF10134',  fc:'G5915'    },
+    mann:   { o:'W712/95', ar:'C13103',    cb:'FP25100',  fc:'WK69'     },
+  },
+  'polo': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-540',  ar:'WA-220',    cb:'AKX-555',  fc:'WFC-799'  },
+    tecfil: { o:'PSL200',  ar:'ARL9000',   cb:'ACP400',   fc:'PCL-555'  },
+    fram:   { o:'PH10060', ar:'CA9809',    cb:'CF10285',  fc:'G10553'   },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK8'      },
+  },
+  'virtus': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-540',  ar:'WA-220',    cb:'AKX-555',  fc:'WFC-799'  },
+    tecfil: { o:'PSL200',  ar:'ARL9000',   cb:'ACP400',   fc:'PCL-555'  },
+    fram:   { o:'PH10060', ar:'CA9809',    cb:'CF10285',  fc:'G10553'   },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK8'      },
+  },
+  't-cross': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-540',  ar:'WA-220',    cb:'AKX-555',  fc:'WFC-799'  },
+    tecfil: { o:'PSL200',  ar:'ARL9000',   cb:'ACP400',   fc:'PCL-555'  },
+    fram:   { o:'PH10060', ar:'CA9809',    cb:'CF10285',  fc:'G10553'   },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK8'      },
+  },
+  'tiguan': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-540',  ar:'WA-220',    cb:'AKX-555',  fc:'WFC-799'  },
+    tecfil: { o:'PSL200',  ar:'ARL9000',   cb:'ACP400',   fc:'PCL-555'  },
+    fram:   { o:'PH10060', ar:'CA9809',    cb:'CF10285',  fc:'G10553'   },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK8'      },
+  },
+  'amarok': {
+    freio: 'DOT 4',
+    wega:   { o:'WD-700',  ar:'WA-350',    cb:'AKX-700',  fc:'WFC-799'  },
+    tecfil: { o:'PSL300',  ar:'ARL5200',   cb:'ACP600',   fc:'PCL-800'  },
+    fram:   { o:'PH9800',  ar:'CA10546',   cb:'CF10285',  fc:'PS10260'  },
+    mann:   { o:'W950/25', ar:'C30130',    cb:'FP2357',   fc:'WK31'     },
+  },
+  'saveiro': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-348',  ar:'WA-050',    cb:'AKX-890',  fc:'WFC-501'  },
+    tecfil: { o:'PSL55',   ar:'ARL4142',   cb:'ACP123',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA9997',    cb:'CF10134',  fc:'G5915'    },
+    mann:   { o:'W712/95', ar:'C13103',    cb:'FP25100',  fc:'WK69'     },
+  },
+
+  // ── FIAT ─────────────────────────────────────────────────
+  'argo': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-198',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL8822',   cb:'ACP501',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W712/94', ar:'C29130/2',  cb:'FP25100',  fc:'WK8'      },
+  },
+  'cronos': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-198',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL8822',   cb:'ACP501',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W712/94', ar:'C29130/2',  cb:'FP25100',  fc:'WK8'      },
+  },
+  'pulse': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-198',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL8822',   cb:'ACP501',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W712/94', ar:'C29130/2',  cb:'FP25100',  fc:'WK8'      },
+  },
+  'fastback': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-198',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL8822',   cb:'ACP501',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W712/94', ar:'C29130/2',  cb:'FP25100',  fc:'WK8'      },
+  },
+  'toro': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-210',    cb:'AKX-600',  fc:'WFC-799'  },
+    tecfil: { o:'PSL160',  ar:'ARL5400',   cb:'ACP501',   fc:'PCL-800'  },
+    fram:   { o:'PH10060', ar:'CA11809',   cb:'CF11002',  fc:'PS10260'  },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK31'     },
+  },
+  'strada': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-198',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL8822',   cb:'ACP501',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W712/94', ar:'C29130/2',  cb:'FP25100',  fc:'WK8'      },
+  },
+  'palio': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-344',  ar:'WA-050',    cb:'AKX-480',  fc:'WFC-501'  },
+    tecfil: { o:'PSL56',   ar:'ARL4142',   cb:'ACP123',   fc:'PCL-523'  },
+    fram:   { o:'PH4967',  ar:'CA9997',    cb:'CF10134',  fc:'G5915'    },
+    mann:   { o:'W712/75', ar:'C13103',    cb:'FP25100',  fc:'WK69'     },
+  },
+
+  // ── TOYOTA ───────────────────────────────────────────────
+  'corolla': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-150',  ar:'WA-100',    cb:'AKX-444',  fc:'WFC-799'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP789',   fc:'PCL-555'  },
+    fram:   { o:'PH4967',  ar:'CA4309',    cb:'CF9845',   fc:'G10553'   },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2939',   fc:'WK8'      },
+  },
+  'yaris': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-150',  ar:'WA-100',    cb:'AKX-444',  fc:'WFC-799'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP789',   fc:'PCL-555'  },
+    fram:   { o:'PH4967',  ar:'CA4309',    cb:'CF9845',   fc:'G10553'   },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2939',   fc:'WK8'      },
+  },
+  'hilux': {
+    freio: 'DOT 3',
+    wega:   { o:'WD-700',  ar:'WA-390',    cb:'AKX-900',  fc:'WFC-799'  },
+    tecfil: { o:'PSL300',  ar:'ARL5500',   cb:'ACP500',   fc:'PCL-800'  },
+    fram:   { o:'PH9800',  ar:'CA10546',   cb:'CF10285',  fc:'PS10260'  },
+    mann:   { o:'W950/25', ar:'C35154',    cb:'FP2357',   fc:'WK8157'   },
+  },
+  'sw4': {
+    freio: 'DOT 3',
+    wega:   { o:'WD-700',  ar:'WA-390',    cb:'AKX-900',  fc:'WFC-799'  },
+    tecfil: { o:'PSL300',  ar:'ARL5500',   cb:'ACP500',   fc:'PCL-800'  },
+    fram:   { o:'PH9800',  ar:'CA10546',   cb:'CF10285',  fc:'PS10260'  },
+    mann:   { o:'W950/25', ar:'C35154',    cb:'FP2357',   fc:'WK8157'   },
+  },
+  'rav4': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-150',  ar:'WA-100',    cb:'AKX-444',  fc:'WFC-799'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP789',   fc:'PCL-555'  },
+    fram:   { o:'PH4967',  ar:'CA4309',    cb:'CF9845',   fc:'G10553'   },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2939',   fc:'WK8'      },
+  },
+
+  // ── HONDA ────────────────────────────────────────────────
+  'civic': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-121',  ar:'WA-037',    cb:'AKX-333',  fc:'WFC-501'  },
+    tecfil: { o:'PSL147',  ar:'ARL4158',   cb:'ACP456',   fc:'PCL-555'  },
+    fram:   { o:'PH7317',  ar:'CA10242',   cb:'CF10285',  fc:'G10553'   },
+    mann:   { o:'W712/75', ar:'C34007',    cb:'FP2357',   fc:'WK8'      },
+  },
+  'hr-v': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-121',  ar:'WA-037',    cb:'AKX-333',  fc:'WFC-501'  },
+    tecfil: { o:'PSL147',  ar:'ARL4158',   cb:'ACP456',   fc:'PCL-555'  },
+    fram:   { o:'PH7317',  ar:'CA10242',   cb:'CF10285',  fc:'G10553'   },
+    mann:   { o:'W712/75', ar:'C34007',    cb:'FP2357',   fc:'WK8'      },
+  },
+  'wr-v': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-121',  ar:'WA-037',    cb:'AKX-333',  fc:'WFC-501'  },
+    tecfil: { o:'PSL147',  ar:'ARL4158',   cb:'ACP456',   fc:'PCL-555'  },
+    fram:   { o:'PH7317',  ar:'CA10242',   cb:'CF10285',  fc:'G10553'   },
+    mann:   { o:'W712/75', ar:'C34007',    cb:'FP2357',   fc:'WK8'      },
+  },
+  'city': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-121',  ar:'WA-037',    cb:'AKX-333',  fc:'WFC-501'  },
+    tecfil: { o:'PSL147',  ar:'ARL4158',   cb:'ACP456',   fc:'PCL-555'  },
+    fram:   { o:'PH7317',  ar:'CA10242',   cb:'CF10285',  fc:'G10553'   },
+    mann:   { o:'W712/75', ar:'C34007',    cb:'FP2357',   fc:'WK8'      },
+  },
+
+  // ── HYUNDAI ──────────────────────────────────────────────
+  'hb20': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-198',    cb:'AKX-222',  fc:'WFC-501'  },
+    tecfil: { o:'PSL159',  ar:'ARL9900',   cb:'ACP300',   fc:'PCL-555'  },
+    fram:   { o:'PH10900', ar:'CA13000',   cb:'CF12000',  fc:'G10900'   },
+    mann:   { o:'W712/94', ar:'C29030/2',  cb:'FP2939',   fc:'WK8'      },
+  },
+  'creta': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-220',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL9000',   cb:'ACP501',   fc:'PCL-555'  },
+    fram:   { o:'PH10060', ar:'CA11809',   cb:'CF11002',  fc:'G10553'   },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK8'      },
+  },
+  'tucson': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-220',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL9000',   cb:'ACP501',   fc:'PCL-555'  },
+    fram:   { o:'PH10060', ar:'CA11809',   cb:'CF11002',  fc:'G10553'   },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK8'      },
+  },
+
+  // ── RENAULT ──────────────────────────────────────────────
+  'kwid': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-350',  ar:'WA-100',    cb:'AKX-480',  fc:'WFC-501'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP456',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA10242',   cb:'CF10285',  fc:'G5915'    },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2357',   fc:'WK69'     },
+  },
+  'sandero': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-350',  ar:'WA-100',    cb:'AKX-480',  fc:'WFC-501'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP456',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA10242',   cb:'CF10285',  fc:'G5915'    },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2357',   fc:'WK69'     },
+  },
+  'duster': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-350',  ar:'WA-100',    cb:'AKX-480',  fc:'WFC-501'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP456',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA10242',   cb:'CF10285',  fc:'G5915'    },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2357',   fc:'WK69'     },
+  },
+  'oroch': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-350',  ar:'WA-100',    cb:'AKX-480',  fc:'WFC-501'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP456',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA10242',   cb:'CF10285',  fc:'G5915'    },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2357',   fc:'WK69'     },
+  },
+  'captur': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-540',  ar:'WA-220',    cb:'AKX-555',  fc:'WFC-799'  },
+    tecfil: { o:'PSL200',  ar:'ARL9000',   cb:'ACP400',   fc:'PCL-555'  },
+    fram:   { o:'PH10060', ar:'CA9809',    cb:'CF10285',  fc:'G10553'   },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK8'      },
+  },
+  'logan': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-350',  ar:'WA-100',    cb:'AKX-480',  fc:'WFC-501'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP456',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA10242',   cb:'CF10285',  fc:'G5915'    },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2357',   fc:'WK69'     },
+  },
+
+  // ── JEEP ─────────────────────────────────────────────────
+  'compass': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-210',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL5400',   cb:'ACP501',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA11809',   cb:'CF11002',  fc:'G10553'   },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK8'      },
+  },
+  'renegade': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-198',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL8822',   cb:'ACP501',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11002',  fc:'G10500'   },
+    mann:   { o:'W712/94', ar:'C29130/2',  cb:'FP25100',  fc:'WK8'      },
+  },
+  'commander': {
+    freio: 'DOT 4',
+    wega:   { o:'WO-480',  ar:'WA-210',    cb:'AKX-600',  fc:'WFC-501'  },
+    tecfil: { o:'PSL160',  ar:'ARL5400',   cb:'ACP501',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA11809',   cb:'CF11002',  fc:'G10553'   },
+    mann:   { o:'W712/94', ar:'C3397',     cb:'FP25100',  fc:'WK8'      },
+  },
+
+  // ── NISSAN ───────────────────────────────────────────────
+  'kicks': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-350',  ar:'WA-100',    cb:'AKX-480',  fc:'WFC-501'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP456',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA10242',   cb:'CF10285',  fc:'G5915'    },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2357',   fc:'WK69'     },
+  },
+  'versa': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-350',  ar:'WA-100',    cb:'AKX-480',  fc:'WFC-501'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP456',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA10242',   cb:'CF10285',  fc:'G5915'    },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2357',   fc:'WK69'     },
+  },
+  'frontier': {
+    freio: 'DOT 3',
+    wega:   { o:'WD-700',  ar:'WA-390',    cb:'AKX-900',  fc:'WFC-799'  },
+    tecfil: { o:'PSL300',  ar:'ARL5500',   cb:'ACP500',   fc:'PCL-800'  },
+    fram:   { o:'PH9800',  ar:'CA10546',   cb:'CF10285',  fc:'PS10260'  },
+    mann:   { o:'W950/25', ar:'C35154',    cb:'FP2357',   fc:'WK8157'   },
+  },
+
+  // ── FORD ─────────────────────────────────────────────────
+  'ka': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-348',  ar:'WA-050',    cb:'AKX-890',  fc:'WFC-501'  },
+    tecfil: { o:'PSL55',   ar:'ARL4142',   cb:'ACP123',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA9997',    cb:'CF10134',  fc:'G5915'    },
+    mann:   { o:'W712/95', ar:'C13103',    cb:'FP25100',  fc:'WK69'     },
+  },
+  'ecosport': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-348',  ar:'WA-050',    cb:'AKX-890',  fc:'WFC-501'  },
+    tecfil: { o:'PSL55',   ar:'ARL4142',   cb:'ACP123',   fc:'PCL-523'  },
+    fram:   { o:'PH6607',  ar:'CA9997',    cb:'CF10134',  fc:'G5915'    },
+    mann:   { o:'W712/95', ar:'C13103',    cb:'FP25100',  fc:'WK69'     },
+  },
+  'ranger': {
+    freio: 'DOT 3',
+    wega:   { o:'WD-700',  ar:'WA-390',    cb:'AKX-900',  fc:'WFC-799'  },
+    tecfil: { o:'PSL300',  ar:'ARL5500',   cb:'ACP500',   fc:'PCL-800'  },
+    fram:   { o:'PH9800',  ar:'CA10546',   cb:'CF10285',  fc:'PS10260'  },
+    mann:   { o:'W950/25', ar:'C35154',    cb:'FP2357',   fc:'WK8157'   },
+  },
+  'territory': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-351',  ar:'WA-198',    cb:'AKX-111',  fc:'WFC-501'  },
+    tecfil: { o:'PSL128',  ar:'ARL8822',   cb:'ACP210',   fc:'PCL-523'  },
+    fram:   { o:'PH10060', ar:'CA12000',   cb:'CF11000',  fc:'G10500'   },
+    mann:   { o:'W719/45', ar:'C29130/2',  cb:'FP3337',   fc:'WK8'      },
+  },
+
+  // ── MITSUBISHI ───────────────────────────────────────────
+  'asx': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-150',  ar:'WA-100',    cb:'AKX-444',  fc:'WFC-799'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP789',   fc:'PCL-555'  },
+    fram:   { o:'PH4967',  ar:'CA4309',    cb:'CF9845',   fc:'G10553'   },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2939',   fc:'WK8'      },
+  },
+  'outlander': {
+    freio: 'DOT 3',
+    wega:   { o:'WO-150',  ar:'WA-100',    cb:'AKX-444',  fc:'WFC-799'  },
+    tecfil: { o:'PSL56',   ar:'ARL2208',   cb:'ACP789',   fc:'PCL-555'  },
+    fram:   { o:'PH4967',  ar:'CA4309',    cb:'CF9845',   fc:'G10553'   },
+    mann:   { o:'W712/75', ar:'C23440',    cb:'FP2939',   fc:'WK8'      },
+  },
+  'l200': {
+    freio: 'DOT 3',
+    wega:   { o:'WD-700',  ar:'WA-390',    cb:'AKX-900',  fc:'WFC-799'  },
+    tecfil: { o:'PSL300',  ar:'ARL5500',   cb:'ACP500',   fc:'PCL-800'  },
+    fram:   { o:'PH9800',  ar:'CA10546',   cb:'CF10285',  fc:'PS10260'  },
+    mann:   { o:'W950/25', ar:'C35154',    cb:'FP2357',   fc:'WK8157'   },
+  },
 };
 
 // ── LOOKUP ÓLEO ───────────────────────────────────────────
@@ -750,17 +1128,19 @@ function consultar() {
       </div>
     </div>
 
-    ${f ? `
     <div class="filtros-section">
       <div class="filtros-title">🔧 Filtros ${filtroMarca.charAt(0).toUpperCase()+filtroMarca.slice(1)}</div>
+      ${f ? `
       <div class="filtro-row"><span>🛢️ Filtro de Óleo</span><span>${f.o}</span></div>
-      <div class="filtro-row"><span>💨 Filtro de Ar</span><span>${f.ar}</span></div>
+      <div class="filtro-row"><span>💨 Filtro de Ar (Motor)</span><span>${f.ar}</span></div>
       <div class="filtro-row"><span>🌬️ Filtro de Cabine</span><span>${f.cb}</span></div>
-    </div>` : `
-    <div class="filtros-section">
-      <div class="filtros-title">🔧 Filtros</div>
-      <div style="font-size:13px;color:var(--muted);padding:4px 0">Consulte o balconista com o modelo/ano para filtros ${filtroMarca}.</div>
-    </div>`}
+      <div class="filtro-row"><span>⛽ Filtro de Combustível</span><span>${f.fc}</span></div>
+      ` : `<div style="font-size:13px;color:var(--muted);padding:4px 0">Modelo não encontrado no banco — consulte o balconista com o nome e ano do veículo.</div>`}
+      <div class="filtro-row" style="margin-top:4px;border-top:1px solid var(--border);padding-top:10px">
+        <span>🔴 Fluido de Freio</span>
+        <span style="color:var(--amber)">${filtros?.freio || 'DOT 3'}</span>
+      </div>
+    </div>
 
     <div class="badges">
       <span class="badge">🔁 Troca: ${spec.int}</span>
