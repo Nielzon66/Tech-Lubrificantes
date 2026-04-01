@@ -2,333 +2,158 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Consulta Veicular</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tech Lubrificantes</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-
-body{
-font-family:Arial;
-background:#0f172a;
-color:#fff;
-margin:0;
-}
-
-.container{
-max-width:900px;
-margin:auto;
-padding:15px;
-}
-
-h2{text-align:center;}
-
-.card{
-background:#1e293b;
-padding:15px;
-border-radius:12px;
-margin-bottom:10px;
-}
-
-input{
-width:100%;
-padding:12px;
-margin:8px 0;
-border-radius:8px;
-border:none;
-background:#0f172a;
-color:#fff;
-}
-
-.marca-lista{
-max-height:200px;
-overflow:auto;
-}
-
-.marca-item{
-display:flex;
-align-items:center;
-gap:10px;
-padding:10px;
-border-bottom:1px solid #334155;
-cursor:pointer;
-}
-
-.marca-item img{width:30px;}
-
-.marca-item:hover{background:#2563eb;}
-
-.veiculo-card{
-background:#1e293b;
-padding:15px;
-border-radius:10px;
-margin-top:8px;
-cursor:pointer;
-}
-
-.veiculo-card:hover{
-background:#2563eb;
-}
-
-.result-card{
-margin-top:15px;
-background:#1e293b;
-border-radius:12px;
-overflow:hidden;
-}
-
-.result-card img{
-width:100%;
-height:220px;
-object-fit:cover;
-}
-
-.result-content{
-padding:15px;
-}
-
-button{
-margin-top:10px;
-padding:12px;
-width:100%;
-border:none;
-border-radius:8px;
-background:#2563eb;
-color:#fff;
-cursor:pointer;
-}
-
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<h2>Consulta Veicular</h2>
-
-<div class="card">
-
-<input id="buscaMarca" placeholder="Digite a marca">
-
-<div id="listaMarcas" class="marca-lista"></div>
-
-<input id="buscaModelo" placeholder="Digite o modelo" disabled>
-
-<select id="ano" disabled></select>
-
-<div id="veiculos"></div>
-
-</div>
-
-<div id="paginaVeiculo"></div>
-
-</div>
-
-<script>
-
-const marcasPermitidas=[
-"Chevrolet",
-"Volkswagen",
-"Fiat",
-"Toyota",
-"Honda",
-"Hyundai",
-"Renault",
-"Nissan",
-"Jeep",
-"Peugeot",
-"Citroen",
-"Ford",
-"Mitsubishi",
-"Kia",
-"Chery",
-"Suzuki",
-"Ram"
-]
-
-const oleos={
-"onix":{oleo:"5W30",litros:"3.5L"},
-"gol":{oleo:"5W40",litros:"3.5L"},
-"hb20":{oleo:"5W30",litros:"3.6L"},
-"corolla":{oleo:"0W20",litros:"4.2L"},
-"civic":{oleo:"0W20",litros:"3.7L"},
-"uno":{oleo:"15W40",litros:"3.2L"},
-"palio":{oleo:"15W40",litros:"3.2L"},
-"ka":{oleo:"5W20",litros:"4L"}
-}
-
-let marcas=[]
-let modelos=[]
-let marcaSelecionada
-let modeloSelecionado
-
-async function carregarMarcas(){
-
-const r=await fetch("https://parallelum.com.br/fipe/api/v1/carros/marcas")
-let data=await r.json()
-
-marcas=data.filter(m=>
-marcasPermitidas.some(p=>
-m.nome.toLowerCase().includes(p.toLowerCase())
-))
-
-mostrarMarcas(marcas)
-
-}
-
-function mostrarMarcas(lista){
-
-listaMarcas.innerHTML=""
-
-lista.forEach(m=>{
-
-const logo=`https://tse2.mm.bing.net/th?q=${m.nome}+logo`
-
-const div=document.createElement("div")
-div.className="marca-item"
-
-div.innerHTML=`
-<img src="${logo}">
-<span>${m.nome}</span>
-`
-
-div.onclick=()=>selecionarMarca(m)
-
-listaMarcas.appendChild(div)
-
-})
-
-}
-
-buscaMarca.oninput=()=>{
-
-const termo=buscaMarca.value.toLowerCase()
-
-const filtrado=marcas.filter(m=>
-m.nome.toLowerCase().includes(termo)
-)
-
-mostrarMarcas(filtrado)
-
-}
-
-async function selecionarMarca(m){
-
-marcaSelecionada=m
-buscaMarca.value=m.nome
-listaMarcas.innerHTML=""
-
-buscaModelo.disabled=false
-
-const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${m.codigo}/modelos`)
-const data=await r.json()
-
-modelos=data.modelos
-
-}
-
-buscaModelo.oninput=()=>{
-
-const termo=buscaModelo.value.toLowerCase()
-
-const lista=modelos.filter(m=>
-m.nome.toLowerCase().includes(termo)
-)
-
-veiculos.innerHTML=""
-
-lista.slice(0,10).forEach(m=>{
-
-const div=document.createElement("div")
-div.className="veiculo-card"
-div.innerHTML=`🚗 ${m.nome}`
-
-div.onclick=()=>selecionarModelo(m)
-
-veiculos.appendChild(div)
-
-})
-
-}
-
-async function selecionarModelo(m){
-
-modeloSelecionado=m
-
-const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelecionada.codigo}/modelos/${m.codigo}/anos`)
-const anos=await r.json()
-
-ano.innerHTML=""
-
-anos.forEach(a=>{
-
-const op=document.createElement("option")
-op.value=a.codigo
-op.text=a.nome
-
-ano.appendChild(op)
-
-})
-
-ano.disabled=false
-
-}
-
-ano.onchange=async()=>{
-
-const r=await fetch(`https://parallelum.com.br/fipe/api/v1/carros/marcas/${marcaSelecionada.codigo}/modelos/${modeloSelecionado.codigo}/anos/${ano.value}`)
-const info=await r.json()
-
-abrirVeiculo(info)
-
-}
-
-function abrirVeiculo(info){
-
-let chave=modeloSelecionado.nome.toLowerCase()
-
-let dados=oleos[chave] || {oleo:"Consultar manual",litros:"-"}
-
-const imagem=`https://tse1.mm.bing.net/th?q=${marcaSelecionada.nome}+${modeloSelecionado.nome}+carro`
-
-paginaVeiculo.innerHTML=`
-
-<div class="result-card">
-
-<img src="${imagem}">
-
-<div class="result-content">
-
-<h3>${marcaSelecionada.nome} ${modeloSelecionado.nome}</h3>
-
-<p>Ano: ${info.AnoModelo}</p>
-<p>Combustível: ${info.Combustivel}</p>
-
-<hr>
-
-<p><b>Óleo recomendado</b></p>
-<p>Tipo: ${dados.oleo}</p>
-<p>Quantidade: ${dados.litros}</p>
-
-<button onclick="voltar()">Voltar</button>
-
-</div>
-
-</div>
-
-`
-
-}
-
-function voltar(){
-
-paginaVeiculo.innerHTML=""
-
-}
-
-carregarMarcas()
-
-</script>
-
-</body>
-</html>
+  :root {
+    --bg: #0b0e14;
+    --surface: #131820;
+    --surface2: #1a2130;
+    --border: #1f2d3d;
+    --accent: #f5a623;
+    --accent2: #e8890e;
+    --blue: #2d8bff;
+    --green: #22c97a;
+    --red: #ff4d4d;
+    --text: #eaf0fb;
+    --muted: #7a8fa6;
+    --card: #161e2b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+  }
+  .logo-text span { color: var(--accent); }
+  .header-badge {
+    background: var(--accent);
+    color: #000;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    gap: 0;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all .2s;
+    letter-spacing: 0.3px;
+  }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+
+  /* CONTENT */
+  .content { padding: 20px; padding-bottom: 90px; }
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .section-title span { color: var(--accent); }
+  .section-sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  /* SELECT */
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  select, input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 13px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color .2s;
+    outline: none;
+  }
+  select:focus, input:focus {
+    border-color: var(--accent);
+  }
+  .select-wrapper {
+    position: relative;
+  }
+  .select-wrapper::
