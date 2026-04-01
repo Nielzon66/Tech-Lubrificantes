@@ -2,414 +2,778 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Consulta Veicular PRO</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+:root {
+  --bg: #0b0e17;
+  --surface: #131a27;
+  --surface2: #1a2235;
+  --border: #1f2e45;
+  --accent: #3b82f6;
+  --accent2: #2563eb;
+  --green: #22c97a;
+  --amber: #f59e0b;
+  --text: #e8f0fe;
+  --muted: #6b84a3;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: Arial;
-  background: #0f172a;
-  color: #fff;
-  margin: 0;
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
 }
 
 .container {
-  max-width: 900px;
-  margin: auto;
-  padding: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+  padding-bottom: 40px;
 }
 
-h2 {
+/* HEADER */
+.header {
   text-align: center;
+  padding: 24px 0 20px;
 }
-
-.card {
-  background: #1e293b;
-  padding: 15px;
-  border-radius: 12px;
+.header-icon {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
   margin-bottom: 10px;
+  box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+}
+.header h1 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.header h1 span { color: var(--accent); }
+.header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.card-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 14px;
 }
 
-input, select {
-  width: 100%;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: none;
-  background: #0f172a;
-  color: #fff;
+/* FORM */
+.form-group { margin-bottom: 12px; }
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
 }
-
-button {
+select, input {
   width: 100%;
-  padding: 14px;
+  padding: 12px 14px;
   border-radius: 10px;
-  border: none;
-  background: linear-gradient(45deg,#2563eb,#3b82f6);
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 14px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  transition: border-color .2s;
+}
+select:focus, input:focus { border-color: var(--accent); }
+select:disabled, input:disabled { opacity: 0.4; }
+
+.select-wrap { position: relative; }
+.select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent);
+  pointer-events: none;
 }
 
-button:active {
-  transform: scale(0.97);
-}
-
+/* AUTOCOMPLETE */
 .relative { position: relative; }
-
 .suggestions {
   position: absolute;
-  background: #1e293b;
-  max-height: 200px;
-  overflow: auto;
-  width: 100%;
+  top: calc(100% + 4px);
+  left: 0; right: 0;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 999;
   display: none;
-  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
 }
-
 .suggestion-item {
-  padding: 10px;
-  border-bottom: 1px solid #334155;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background .15s;
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover, .suggestion-item:active { background: rgba(59,130,246,.15); color: var(--accent); }
+
+/* CHIPS TIPO */
+.tipo-chips { display: flex; gap: 8px; margin-bottom: 16px; }
+.tipo-chip {
+  flex: 1;
+  padding: 9px 6px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+}
+.tipo-chip.active {
+  background: rgba(59,130,246,.15);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-.suggestion-item:active {
-  background: #2563eb;
+/* BUTTON */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: all .2s;
+  box-shadow: 0 4px 16px rgba(59,130,246,.3);
 }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,130,246,.4); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 
+/* STATUS */
 .status {
   text-align: center;
-  font-size: 14px;
-  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  padding: 8px 0;
+  min-height: 28px;
 }
+.status.error { color: #f87171; }
 
-.error { color: #f87171; }
+/* LOADING */
+.spinner {
+  width: 28px; height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 16px auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
+/* RESULT */
 .result-card {
-  margin-top: 15px;
-  background: #1e293b;
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   overflow: hidden;
-  animation: fadeIn 0.4s ease;
+  animation: fadeIn .4s ease;
+  margin-top: 16px;
 }
-
-.result-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-
-.result-content {
-  padding: 15px;
-}
-
-.result-content h3 {
-  margin: 0 0 10px;
-}
-
-.result-content p {
-  margin: 5px 0;
-  font-size: 14px;
-}
-
-.badge {
-  display: inline-block;
-  background: #2563eb;
-  padding: 5px 10px;
-  border-radius: 6px;
-  font-size: 12px;
-  margin-top: 5px;
-}
-
 @keyframes fadeIn {
   from { opacity:0; transform:translateY(10px); }
   to { opacity:1; transform:translateY(0); }
 }
+
+.result-header {
+  background: linear-gradient(135deg, #0d1f3c, #0a1628);
+  padding: 18px;
+  border-bottom: 1px solid var(--border);
+}
+.result-header h3 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.result-header p { font-size: 13px; color: var(--muted); }
+
+.spec-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+.spec-item {
+  background: var(--surface);
+  padding: 14px 16px;
+}
+.spec-item.full { grid-column: 1 / -1; }
+.spec-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 4px;
+}
+.spec-value {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.spec-value.green { color: var(--green); }
+.spec-value.amber { color: var(--amber); }
+.spec-value.sm { font-size: 15px; }
+
+.filtros-section { padding: 16px; }
+.filtros-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.filtro-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.filtro-row:last-child { border-bottom: none; }
+.filtro-row span:first-child { color: var(--muted); }
+.filtro-row span:last-child { font-weight: 700; font-family: 'Rajdhani', sans-serif; font-size: 16px; }
+
+.badges { padding: 0 16px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+.badge {
+  background: rgba(59,130,246,.15);
+  border: 1px solid rgba(59,130,246,.3);
+  color: var(--accent);
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.badge.green {
+  background: rgba(34,201,122,.1);
+  border-color: rgba(34,201,122,.3);
+  color: var(--green);
+}
+.badge.amber {
+  background: rgba(245,158,11,.1);
+  border-color: rgba(245,158,11,.3);
+  color: var(--amber);
+}
+
+.obs-box {
+  margin: 0 16px 16px;
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.25);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  color: #c8a45a;
+  line-height: 1.5;
+}
 </style>
 </head>
-
 <body>
 
 <div class="container">
 
-<h2>🚗 Consulta Veicular PRO</h2>
+  <div class="header">
+    <div class="header-icon">🔧</div>
+    <h1>Consulta <span>Veicular</span> PRO</h1>
+    <p>Dados reais da tabela FIPE · Mercado brasileiro</p>
+  </div>
 
-<div id="status" class="status"></div>
+  <div class="card">
+    <div class="card-title">Tipo de veículo</div>
+    <div class="tipo-chips">
+      <div class="tipo-chip active" onclick="setTipo(this,'carros')">🚗 Carros</div>
+      <div class="tipo-chip" onclick="setTipo(this,'motos')">🏍️ Motos</div>
+      <div class="tipo-chip" onclick="setTipo(this,'caminhoes')">🚛 Caminhões</div>
+    </div>
 
-<div class="card">
+    <div class="form-group">
+      <label class="form-label">Marca</label>
+      <div class="select-wrap">
+        <select id="marca"></select>
+      </div>
+    </div>
 
-<select id="tipo">
-  <option value="carros">Carros</option>
-  <option value="motos">Motos</option>
-  <option value="caminhoes">Caminhões</option>
-</select>
+    <div class="form-group">
+      <label class="form-label">Modelo</label>
+      <div class="relative">
+        <input id="modelo" placeholder="Digite para pesquisar..." disabled autocomplete="off">
+        <div id="sugestoes" class="suggestions"></div>
+      </div>
+    </div>
 
-<select id="marca"></select>
+    <div class="form-group">
+      <label class="form-label">Ano</label>
+      <div class="select-wrap">
+        <select id="ano" disabled><option value="">Selecione o ano</option></select>
+      </div>
+    </div>
 
-<div class="relative">
-<input id="modelo" placeholder="Digite o modelo..." disabled>
-<div id="sugestoes" class="suggestions"></div>
-</div>
+    <div class="form-group">
+      <label class="form-label">Motor / Versão</label>
+      <div class="select-wrap">
+        <select id="motor">
+          <option value="">Selecione o motor</option>
+          <option value="1.0">1.0 (aspirado)</option>
+          <option value="1.0t">1.0 Turbo</option>
+          <option value="1.2t">1.2 Turbo</option>
+          <option value="1.3t">1.3 Turbo</option>
+          <option value="1.4">1.4</option>
+          <option value="1.4t">1.4 Turbo</option>
+          <option value="1.5t">1.5 Turbo</option>
+          <option value="1.6">1.6</option>
+          <option value="1.8">1.8</option>
+          <option value="2.0">2.0</option>
+          <option value="2.0t">2.0 Turbo</option>
+          <option value="2.4">2.4</option>
+          <option value="diesel2.0">2.0 Diesel</option>
+          <option value="diesel2.2">2.2 Diesel</option>
+          <option value="diesel2.5">2.5 Diesel</option>
+          <option value="diesel2.8">2.8 Diesel</option>
+          <option value="diesel3.0">3.0 Diesel</option>
+          <option value="diesel4.5">4.5 Diesel</option>
+          <option value="hibrido1.8">1.8 Híbrido</option>
+          <option value="eletrico">Elétrico</option>
+        </select>
+      </div>
+    </div>
 
-<select id="ano" disabled></select>
+    <div class="form-group">
+      <label class="form-label">Marca do filtro</label>
+      <div class="select-wrap">
+        <select id="marcaFiltro">
+          <option value="wega">Wega</option>
+          <option value="tecfil">Tecfil</option>
+          <option value="fram">Fram</option>
+          <option value="mann">Mann-Filter</option>
+        </select>
+      </div>
+    </div>
 
-<select id="motor">
-  <option value="">Selecione o motor</option>
-  <option value="1.0">1.0</option>
-  <option value="1.4">1.4</option>
-  <option value="1.6">1.6</option>
-  <option value="2.0">2.0</option>
-  <option value="diesel">Diesel</option>
-</select>
+    <div id="status" class="status"></div>
+    <button class="btn" id="btnBuscar" onclick="consultar()">🔍 Consultar Lubrificante</button>
+  </div>
 
-<select id="marcaFiltro">
-  <option value="wega">Wega</option>
-  <option value="tecfil">Tecfil</option>
-  <option value="fram">Fram</option>
-</select>
-
-<button id="btnBuscar">🔍 Consultar</button>
-
-</div>
-
-<div id="resultado"></div>
+  <div id="resultado"></div>
 
 </div>
 
 <script>
-const tipo = document.getElementById('tipo');
-const marca = document.getElementById('marca');
-const modelo = document.getElementById('modelo');
-const sugestoes = document.getElementById('sugestoes');
-const ano = document.getElementById('ano');
-const status = document.getElementById('status');
-const resultado = document.getElementById('resultado');
-const marcaFiltro = document.getElementById('marcaFiltro');
-const motorEl = document.getElementById('motor');
+// ── ESTADO ────────────────────────────────────────────────
+let tipoAtual = 'carros';
+let modeloSelecionado = null;
+let listaModelos = [];
 
-let modelos = [];
+const els = {
+  marca: document.getElementById('marca'),
+  modelo: document.getElementById('modelo'),
+  sugestoes: document.getElementById('sugestoes'),
+  ano: document.getElementById('ano'),
+  motor: document.getElementById('motor'),
+  marcaFiltro: document.getElementById('marcaFiltro'),
+  status: document.getElementById('status'),
+  resultado: document.getElementById('resultado'),
+};
 
-function setStatus(msg, erro=false){
-  status.innerText = msg;
-  status.className = erro ? 'status error' : 'status';
+// ── STATUS ────────────────────────────────────────────────
+function setStatus(msg, erro = false) {
+  els.status.textContent = msg;
+  els.status.className = 'status' + (erro ? ' error' : '');
 }
 
-async function fetchComBackup(url1, url2){
-  try{
-    const r1 = await fetch(url1);
-    if(!r1.ok) throw "erro1";
-    return await r1.json();
-  }catch{
-    const r2 = await fetch(url2);
-    if(!r2.ok) throw "erro2";
-    return await r2.json();
+// ── TIPO ──────────────────────────────────────────────────
+function setTipo(el, tipo) {
+  document.querySelectorAll('.tipo-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  tipoAtual = tipo;
+  resetForm();
+  carregarMarcas();
+}
+
+function resetForm() {
+  els.modelo.value = '';
+  els.modelo.disabled = true;
+  els.sugestoes.style.display = 'none';
+  els.ano.innerHTML = '<option value="">Selecione o ano</option>';
+  els.ano.disabled = true;
+  modeloSelecionado = null;
+  listaModelos = [];
+  els.resultado.innerHTML = '';
+}
+
+// ── FIPE API ──────────────────────────────────────────────
+async function fipeGet(path) {
+  const base = 'https://parallelum.com.br/fipe/api/v1';
+  const r = await fetch(base + path);
+  if (!r.ok) throw new Error('FIPE ' + r.status);
+  return r.json();
+}
+
+async function carregarMarcas() {
+  setStatus('Carregando marcas...');
+  els.marca.innerHTML = '<option value="">Carregando...</option>';
+  try {
+    const data = await fipeGet(`/${tipoAtual}/marcas`);
+    els.marca.innerHTML = '<option value="">Selecione a marca</option>';
+    data.forEach(m => els.marca.add(new Option(m.nome, m.codigo)));
+    setStatus('');
+  } catch {
+    setStatus('Erro ao carregar marcas. Verifique a conexão.', true);
   }
 }
 
-async function carregarMarcas(){
-  setStatus("Carregando marcas...");
-  try{
-    const data = await fetchComBackup(
-      `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas`,
-      `https://brasilapi.com.br/api/fipe/marcas/v1/${tipo.value}`
-    );
+els.marca.addEventListener('change', async () => {
+  resetForm();
+  if (!els.marca.value) return;
+  setStatus('Carregando modelos...');
+  try {
+    const data = await fipeGet(`/${tipoAtual}/marcas/${els.marca.value}/modelos`);
+    listaModelos = data.modelos || data;
+    els.modelo.disabled = false;
+    els.modelo.placeholder = 'Digite para pesquisar...';
+    setStatus('');
+  } catch {
+    setStatus('Erro ao carregar modelos.', true);
+  }
+});
 
-    marca.innerHTML = '<option value="">Selecione a marca</option>';
-
-    data.forEach(m=>{
-      marca.add(new Option(m.nome, m.codigo));
+els.modelo.addEventListener('input', () => {
+  const termo = els.modelo.value.toLowerCase().trim();
+  els.sugestoes.innerHTML = '';
+  if (!termo) { els.sugestoes.style.display = 'none'; return; }
+  const lista = listaModelos.filter(m => m.nome.toLowerCase().includes(termo));
+  if (!lista.length) { els.sugestoes.style.display = 'none'; return; }
+  lista.slice(0, 12).forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'suggestion-item';
+    div.textContent = m.nome;
+    div.addEventListener('mousedown', async (e) => {
+      e.preventDefault();
+      els.modelo.value = m.nome;
+      modeloSelecionado = m;
+      els.sugestoes.style.display = 'none';
+      await carregarAnos(m.codigo);
     });
-
-    setStatus("");
-
-  }catch{
-    setStatus("Erro ao carregar marcas", true);
-  }
-}
-
-marca.addEventListener('change', async ()=>{
-  modelo.value='';
-  modelo.disabled=true;
-  sugestoes.style.display='none';
-  ano.innerHTML='';
-  ano.disabled=true;
-
-  if(!marca.value) return;
-
-  setStatus("Carregando modelos...");
-
-  try{
-    const data = await fetchComBackup(
-      `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos`,
-      `https://brasilapi.com.br/api/fipe/veiculos/v1/${tipo.value}/${marca.value}`
-    );
-
-    modelos = data.modelos || data;
-
-    modelo.disabled=false;
-    setStatus("");
-
-  }catch{
-    setStatus("Erro ao carregar modelos", true);
-  }
-});
-
-modelo.addEventListener('input', ()=>{
-  const termo = modelo.value.toLowerCase();
-
-  const lista = modelos.filter(m =>
-    m.nome.toLowerCase().includes(termo)
-  );
-
-  sugestoes.innerHTML='';
-
-  lista.slice(0,10).forEach(m=>{
-    const div=document.createElement('div');
-    div.className='suggestion-item';
-    div.textContent=m.nome;
-
-    div.onclick=async ()=>{
-      modelo.value=m.nome;
-      sugestoes.style.display='none';
-
-      setStatus("Carregando anos...");
-
-      try{
-        const anosData = await fetchComBackup(
-          `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos/${m.codigo}/anos`,
-          `https://brasilapi.com.br/api/fipe/veiculo/v1/${tipo.value}/${marca.value}/${m.codigo}`
-        );
-
-        const listaAnos = anosData.anos || anosData;
-
-        ano.innerHTML='';
-
-        listaAnos.forEach(a=>{
-          ano.add(new Option(a.nome, a.codigo));
-        });
-
-        ano.disabled=false;
-        setStatus("");
-
-      }catch{
-        setStatus("Erro ao carregar anos", true);
-      }
-    };
-
-    sugestoes.appendChild(div);
+    els.sugestoes.appendChild(div);
   });
-
-  sugestoes.style.display = lista.length ? 'block' : 'none';
+  els.sugestoes.style.display = 'block';
 });
 
-// 🔥 BANCO DE FILTROS EXPANDIDO
-function gerarFiltros(modelo){
-  modelo = modelo.toLowerCase();
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.relative')) els.sugestoes.style.display = 'none';
+});
 
-  if(modelo.includes("gol")){
-    return {
-      wega:{oleo:"WO-348", ar:"FA-1234", combustivel:"FCI-567", cabine:"AKX-890"},
-      tecfil:{oleo:"PSL55", ar:"ARL4142", combustivel:"FC123", cabine:"ACP123"},
-      fram:{oleo:"PH6607", ar:"CA9997", combustivel:"G5915", cabine:"CF10134"}
-    };
+async function carregarAnos(codigoModelo) {
+  setStatus('Carregando anos...');
+  els.ano.innerHTML = '<option value="">Carregando...</option>';
+  els.ano.disabled = true;
+  try {
+    const data = await fipeGet(`/${tipoAtual}/marcas/${els.marca.value}/modelos/${codigoModelo}/anos`);
+    els.ano.innerHTML = '<option value="">Selecione o ano</option>';
+    (data.anos || data).forEach(a => els.ano.add(new Option(a.nome, a.codigo)));
+    els.ano.disabled = false;
+    setStatus('');
+  } catch {
+    setStatus('Erro ao carregar anos.', true);
   }
-
-  if(modelo.includes("civic")){
-    return {
-      wega:{oleo:"WO-121", ar:"FA-777", combustivel:"FCI-222", cabine:"AKX-333"},
-      tecfil:{oleo:"PSL147", ar:"ARL4158", combustivel:"FC789", cabine:"ACP456"},
-      fram:{oleo:"PH7317", ar:"CA10242", combustivel:"G7323", cabine:"CF10285"}
-    };
-  }
-
-  if(modelo.includes("corolla")){
-    return {
-      wega:{oleo:"WO-150", ar:"FA-888", combustivel:"FCI-999", cabine:"AKX-444"},
-      tecfil:{oleo:"PSL56", ar:"ARL2208", combustivel:"FC456", cabine:"ACP789"},
-      fram:{oleo:"PH4967", ar:"CA4309", combustivel:"G10147", cabine:"CF9845"}
-    };
-  }
-
-  if(modelo.includes("onix")){
-    return {
-      wega:{oleo:"WO-351", ar:"FA-1900", combustivel:"FCI-600", cabine:"AKX-111"},
-      tecfil:{oleo:"PSL128", ar:"ARL8822", combustivel:"FC210", cabine:"ACP210"},
-      fram:{oleo:"PH10060", ar:"CA12000", combustivel:"G10500", cabine:"CF11000"}
-    };
-  }
-
-  if(modelo.includes("hb20")){
-    return {
-      wega:{oleo:"WO-480", ar:"FA-2020", combustivel:"FCI-777", cabine:"AKX-222"},
-      tecfil:{oleo:"PSL159", ar:"ARL9900", combustivel:"FC300", cabine:"ACP300"},
-      fram:{oleo:"PH10900", ar:"CA13000", combustivel:"G11000", cabine:"CF12000"}
-    };
-  }
-
-  return {
-    wega:{oleo:"Não encontrado", ar:"Não encontrado", combustivel:"Não encontrado", cabine:"Não encontrado"},
-    tecfil:{oleo:"Não encontrado", ar:"Não encontrado", combustivel:"Não encontrado", cabine:"Não encontrado"},
-    fram:{oleo:"Não encontrado", ar:"Não encontrado", combustivel:"Não encontrado", cabine:"Não encontrado"}
-  };
 }
 
-document.getElementById('btnBuscar').addEventListener('click', ()=>{
+// ── BANCO DE ÓLEO ─────────────────────────────────────────
+// Estrutura: { viscosidade, tipo, litros, api, intervalo, obs? }
+// Chave: keywords do modelo (lowercase) + motor
 
-  const marcaNome = marca.options[marca.selectedIndex]?.text;
-  const modeloNome = modelo.value;
-  const anoNome = ano.options[ano.selectedIndex]?.text;
-  const filtro = marcaFiltro.value;
-  const motor = motorEl.value;
+const OLEO_DB = {
+  // ── CHEVROLET ──────────────────────────────────────────
+  'onix':       { '1.0':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SP', int:'10.000 km' },
+                  '1.0t':  { v:'0W-20', t:'Sintético',      l:'3,5L', api:'SP', int:'10.000 km', obs:'Motor turbo requer óleo 0W-20 de baixa viscosidade' },
+                  '1.4':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  'tracker':    { '1.0t':  { v:'0W-20', t:'Sintético',      l:'4,0L', api:'SP', int:'10.000 km', obs:'Motor 1.0 Turbo exige 0W-20 conforme manual GM' },
+                  '1.2t':  { v:'0W-20', t:'Sintético',      l:'4,0L', api:'SP', int:'10.000 km' },
+                  '1.4t':  { v:'5W-30', t:'Sintético',      l:'4,0L', api:'SN', int:'10.000 km' } },
+  'cruze':      { '1.4t':  { v:'5W-30', t:'Sintético',      l:'4,2L', api:'SN', int:'10.000 km' },
+                  '1.5t':  { v:'0W-20', t:'Sintético',      l:'4,2L', api:'SP', int:'10.000 km' } },
+  'spin':       { '1.0t':  { v:'0W-20', t:'Sintético',      l:'3,5L', api:'SP', int:'10.000 km' },
+                  '1.8':   { v:'5W-30', t:'Sintético',      l:'3,8L', api:'SN', int:'10.000 km' } },
+  's10':        { 'diesel2.8': { v:'5W-30', t:'Sintético Diesel', l:'7,0L', api:'CK-4', int:'10.000 km', obs:'Use óleo com especificação Dexos D' } },
+  'trailblazer':{ 'diesel2.8': { v:'5W-30', t:'Sintético Diesel', l:'7,0L', api:'CK-4', int:'10.000 km' } },
+  'montana':    { '1.2t':  { v:'0W-20', t:'Sintético',      l:'3,5L', api:'SP', int:'10.000 km' } },
 
-  if(!marca.value || !modeloNome || !ano.value || !motor){
-    alert("Preencha todos os campos");
+  // ── VOLKSWAGEN ─────────────────────────────────────────
+  'gol':        { '1.0':   { v:'15W-40', t:'Semissintético', l:'3,0L', api:'SN', int:'7.500 km', obs:'Motor G4 permite 15W-40 em clima tropical. Prefira semissintético ou sintético.' },
+                  '1.6':   { v:'10W-40', t:'Semissintético', l:'3,5L', api:'SN', int:'7.500 km' } },
+  'polo':       { '1.0t':  { v:'0W-20', t:'Sintético',      l:'3,8L', api:'SP', int:'15.000 km', obs:'Motor TSI requer óleo VW 508 00 / 0W-20' },
+                  '1.6':   { v:'5W-40', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  'virtus':     { '1.0t':  { v:'0W-20', t:'Sintético',      l:'3,8L', api:'SP', int:'15.000 km' },
+                  '1.6':   { v:'5W-40', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  't-cross':    { '1.0t':  { v:'0W-20', t:'Sintético',      l:'4,0L', api:'SP', int:'15.000 km' },
+                  '1.4t':  { v:'5W-40', t:'Sintético',      l:'4,0L', api:'SN', int:'10.000 km' } },
+  'tiguan':     { '1.4t':  { v:'5W-40', t:'Sintético',      l:'4,5L', api:'SN', int:'15.000 km' },
+                  '2.0t':  { v:'5W-40', t:'Sintético',      l:'5,0L', api:'SN', int:'15.000 km' } },
+  'amarok':     { 'diesel2.0': { v:'5W-30', t:'Sintético Diesel', l:'5,0L', api:'CJ-4', int:'10.000 km' },
+                  'diesel3.0': { v:'5W-30', t:'Sintético Diesel', l:'7,0L', api:'CK-4', int:'10.000 km' } },
+  'saveiro':    { '1.6':   { v:'5W-40', t:'Semissintético', l:'3,5L', api:'SN', int:'7.500 km' } },
+
+  // ── FIAT ───────────────────────────────────────────────
+  'argo':       { '1.0':   { v:'5W-30', t:'Sintético',      l:'3,3L', api:'SN', int:'10.000 km' },
+                  '1.3':   { v:'5W-30', t:'Sintético',      l:'3,3L', api:'SN', int:'10.000 km' },
+                  '1.8':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  'cronos':     { '1.3':   { v:'5W-30', t:'Sintético',      l:'3,3L', api:'SN', int:'10.000 km' },
+                  '1.8':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  'toro':       { '1.8':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' },
+                  'diesel2.0': { v:'0W-30', t:'Sintético Diesel', l:'5,5L', api:'CJ-4', int:'20.000 km', obs:'Motor 2.0 Diesel MultiJet 2 aceita intervalo de 20.000 km com óleo 0W-30' } },
+  'strada':     { '1.3':   { v:'5W-30', t:'Sintético',      l:'3,3L', api:'SN', int:'10.000 km' } },
+  'pulse':      { '1.0t':  { v:'0W-20', t:'Sintético',      l:'3,3L', api:'SP', int:'15.000 km', obs:'Motor 1.0 Turbo Firefly requer 0W-20' } },
+  'fastback':   { '1.0t':  { v:'0W-20', t:'Sintético',      l:'3,3L', api:'SP', int:'15.000 km' } },
+  'palio':      { '1.0':   { v:'15W-40', t:'Semissintético', l:'3,3L', api:'SN', int:'7.500 km' },
+                  '1.8':   { v:'5W-40', t:'Semissintético', l:'3,5L', api:'SN', int:'7.500 km' } },
+
+  // ── TOYOTA ─────────────────────────────────────────────
+  'corolla':    { '2.0':   { v:'5W-30', t:'Sintético',      l:'4,2L', api:'SN', int:'10.000 km' },
+                  'hibrido1.8': { v:'0W-20', t:'Sintético',  l:'4,2L', api:'SN', int:'10.000 km', obs:'Motor híbrido Toyota requer 0W-20 específico Toyota' } },
+  'yaris':      { '1.5':   { v:'5W-30', t:'Sintético',      l:'3,9L', api:'SN', int:'10.000 km' } },
+  'hilux':      { 'diesel2.8': { v:'5W-30', t:'Sintético Diesel', l:'7,5L', api:'CK-4', int:'10.000 km', obs:'Use óleo ACEA C3 ou equivalente aprovado Toyota' } },
+  'sw4':        { 'diesel2.8': { v:'5W-30', t:'Sintético Diesel', l:'7,5L', api:'CK-4', int:'10.000 km' } },
+  'rav4':       { '2.0':   { v:'0W-16', t:'Sintético',      l:'4,5L', api:'SN', int:'10.000 km', obs:'Toyota RAV4 2.0 requer 0W-16, viscodidade muito baixa' } },
+
+  // ── HONDA ──────────────────────────────────────────────
+  'civic':      { '1.5t':  { v:'0W-20', t:'Sintético',      l:'3,7L', api:'SN', int:'10.000 km', obs:'Motor 1.5 VTEC Turbo exige 0W-20 Honda' },
+                  '2.0':   { v:'5W-30', t:'Sintético',      l:'3,8L', api:'SN', int:'10.000 km' } },
+  'hrv':        { '1.5':   { v:'0W-20', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  'wrv':        { '1.5':   { v:'0W-20', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  'city':       { '1.5':   { v:'0W-20', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+
+  // ── HYUNDAI ────────────────────────────────────────────
+  'hb20':       { '1.0':   { v:'5W-30', t:'Sintético',      l:'3,0L', api:'SN', int:'10.000 km' },
+                  '1.0t':  { v:'5W-40', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' },
+                  '1.6':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  'creta':      { '1.0t':  { v:'5W-30', t:'Sintético',      l:'4,0L', api:'SN', int:'10.000 km' },
+                  '2.0':   { v:'5W-30', t:'Sintético',      l:'4,2L', api:'SN', int:'10.000 km' } },
+  'tucson':     { '1.6t':  { v:'5W-30', t:'Sintético',      l:'4,5L', api:'SP', int:'10.000 km' } },
+
+  // ── RENAULT ────────────────────────────────────────────
+  'kwid':       { '1.0':   { v:'5W-30', t:'Sintético',      l:'3,0L', api:'SN', int:'10.000 km' } },
+  'sandero':    { '1.0':   { v:'5W-40', t:'Semissintético', l:'3,0L', api:'SN', int:'7.500 km' },
+                  '1.6':   { v:'5W-40', t:'Semissintético', l:'3,5L', api:'SN', int:'7.500 km' } },
+  'duster':     { '1.6':   { v:'5W-40', t:'Semissintético', l:'3,5L', api:'SN', int:'7.500 km' },
+                  '2.0':   { v:'5W-40', t:'Semissintético', l:'4,0L', api:'SN', int:'7.500 km' } },
+  'oroch':      { '1.6':   { v:'5W-40', t:'Semissintético', l:'3,5L', api:'SN', int:'7.500 km' },
+                  '2.0':   { v:'5W-40', t:'Semissintético', l:'4,0L', api:'SN', int:'7.500 km' } },
+  'captur':     { '1.3t':  { v:'5W-40', t:'Sintético',      l:'4,5L', api:'SN', int:'15.000 km' } },
+
+  // ── JEEP ───────────────────────────────────────────────
+  'compass':    { '1.3t':  { v:'0W-20', t:'Sintético',      l:'4,5L', api:'SP', int:'10.000 km' },
+                  '2.0':   { v:'5W-30', t:'Sintético',      l:'5,0L', api:'SN', int:'10.000 km' },
+                  'diesel2.0': { v:'0W-30', t:'Sintético Diesel', l:'5,5L', api:'CJ-4', int:'20.000 km', obs:'Diesel MultiJet 2: 0W-30 com intervalo de 20.000 km' } },
+  'renegade':   { '1.3t':  { v:'0W-20', t:'Sintético',      l:'4,0L', api:'SP', int:'10.000 km' },
+                  '1.8':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  'commander':  { '1.3t':  { v:'0W-20', t:'Sintético',      l:'4,5L', api:'SP', int:'10.000 km' },
+                  'diesel3.0': { v:'5W-40', t:'Sintético Diesel', l:'10,0L', api:'CK-4', int:'10.000 km' } },
+
+  // ── NISSAN ─────────────────────────────────────────────
+  'kicks':      { '1.6':   { v:'5W-30', t:'Sintético',      l:'4,1L', api:'SN', int:'10.000 km' } },
+  'versa':      { '1.6':   { v:'5W-30', t:'Sintético',      l:'3,7L', api:'SN', int:'10.000 km' } },
+  'frontier':   { 'diesel2.5': { v:'5W-30', t:'Sintético Diesel', l:'7,0L', api:'CJ-4', int:'10.000 km' } },
+
+  // ── FORD ───────────────────────────────────────────────
+  'ka':         { '1.0':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' },
+                  '1.5':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' } },
+  'ecosport':   { '1.5':   { v:'5W-30', t:'Sintético',      l:'3,5L', api:'SN', int:'10.000 km' },
+                  '2.0':   { v:'5W-30', t:'Sintético',      l:'4,5L', api:'SN', int:'10.000 km' } },
+  'ranger':     { 'diesel2.2': { v:'5W-30', t:'Sintético Diesel', l:'7,0L', api:'CJ-4', int:'10.000 km' },
+                  'diesel3.0': { v:'5W-30', t:'Sintético Diesel', l:'9,0L', api:'CK-4', int:'10.000 km' } },
+  'territory':  { '1.5t':  { v:'5W-30', t:'Sintético',      l:'4,5L', api:'SN', int:'10.000 km' } },
+
+  // ── MITSUBISHI ─────────────────────────────────────────
+  'asx':        { '2.0':   { v:'5W-30', t:'Sintético',      l:'4,5L', api:'SN', int:'10.000 km' } },
+  'outlander':  { '2.0':   { v:'5W-30', t:'Sintético',      l:'4,5L', api:'SN', int:'10.000 km' },
+                  'diesel2.2': { v:'5W-30', t:'Sintético Diesel', l:'7,0L', api:'CJ-4', int:'10.000 km' } },
+  'l200':       { 'diesel2.4': { v:'5W-30', t:'Sintético Diesel', l:'7,0L', api:'CK-4', int:'10.000 km' } },
+
+  // ── MOTOS (básico) ─────────────────────────────────────
+  'cg':         { '1.0':   { v:'10W-30', t:'Semissintético Moto', l:'0,8L', api:'MA2', int:'3.000 km', obs:'Use óleo específico para motos (MA2). NÃO use óleo automotivo comum.' } },
+  'factor':     { '1.0':   { v:'10W-30', t:'Semissintético Moto', l:'0,95L', api:'MA2', int:'3.000 km', obs:'Use óleo específico para motos (MA2).' } },
+  'fazer':      { '1.0':   { v:'10W-40', t:'Semissintético Moto', l:'1,0L', api:'MA2', int:'4.000 km' } },
+  'cb':         { '1.0':   { v:'10W-30', t:'Sintético Moto', l:'1,5L', api:'MA2', int:'5.000 km' } },
+  'ninja':      { '1.0':   { v:'10W-40', t:'Sintético Moto', l:'1,6L', api:'MA2', int:'5.000 km' } },
+};
+
+// ── BANCO DE FILTROS ──────────────────────────────────────
+const FILTROS_DB = {
+  'gol':     { wega:{o:'WO-348',ar:'FA-1234',cb:'AKX-890'}, tecfil:{o:'PSL55',ar:'ARL4142',cb:'ACP123'}, fram:{o:'PH6607',ar:'CA9997',cb:'CF10134'}, mann:{o:'W712/95',ar:'C13103',cb:'FP25100'} },
+  'onix':    { wega:{o:'WO-351',ar:'FA-1900',cb:'AKX-111'}, tecfil:{o:'PSL128',ar:'ARL8822',cb:'ACP210'}, fram:{o:'PH10060',ar:'CA12000',cb:'CF11000'}, mann:{o:'W719/45',ar:'C29130/2',cb:'FP3337'} },
+  'tracker': { wega:{o:'WO-351',ar:'FA-1900',cb:'AKX-111'}, tecfil:{o:'PSL128',ar:'ARL8822',cb:'ACP210'}, fram:{o:'PH10060',ar:'CA12000',cb:'CF11000'}, mann:{o:'W719/45',ar:'C29130/2',cb:'FP3337'} },
+  'cruze':   { wega:{o:'WO-351',ar:'FA-1540',cb:'AKX-320'}, tecfil:{o:'PSL144',ar:'ARL9900',cb:'ACP300'}, fram:{o:'PH10060',ar:'CA11809',cb:'CF10285'}, mann:{o:'W719/45',ar:'C2698',cb:'FP27009'} },
+  'polo':    { wega:{o:'WO-540',ar:'FA-2200',cb:'AKX-555'}, tecfil:{o:'PSL200',ar:'ARL9000',cb:'ACP400'}, fram:{o:'PH10060',ar:'CA9809',cb:'CF10285'}, mann:{o:'W712/94',ar:'C3397',cb:'FP25100'} },
+  'virtus':  { wega:{o:'WO-540',ar:'FA-2200',cb:'AKX-555'}, tecfil:{o:'PSL200',ar:'ARL9000',cb:'ACP400'}, fram:{o:'PH10060',ar:'CA9809',cb:'CF10285'}, mann:{o:'W712/94',ar:'C3397',cb:'FP25100'} },
+  'hb20':    { wega:{o:'WO-480',ar:'FA-2020',cb:'AKX-222'}, tecfil:{o:'PSL159',ar:'ARL9900',cb:'ACP300'}, fram:{o:'PH10900',ar:'CA13000',cb:'CF12000'}, mann:{o:'W712/94',ar:'C29030/2',cb:'FP2939'} },
+  'civic':   { wega:{o:'WO-121',ar:'FA-777', cb:'AKX-333'}, tecfil:{o:'PSL147',ar:'ARL4158',cb:'ACP456'}, fram:{o:'PH7317', ar:'CA10242',cb:'CF10285'}, mann:{o:'W712/75',ar:'C34007',cb:'FP2357'} },
+  'corolla': { wega:{o:'WO-150',ar:'FA-888', cb:'AKX-444'}, tecfil:{o:'PSL56', ar:'ARL2208',cb:'ACP789'}, fram:{o:'PH4967', ar:'CA4309', cb:'CF9845'}, mann:{o:'W712/75',ar:'C23440',cb:'FP2939'} },
+  'hilux':   { wega:{o:'WD-777',ar:'FA-3900',cb:'AKX-900'}, tecfil:{o:'PSL300',ar:'ARL5500',cb:'ACP500'}, fram:{o:'PH9800', ar:'CA10546',cb:'CF10285'}, mann:{o:'W950/25',ar:'C35154',cb:'FP2357'} },
+  'compass': { wega:{o:'WO-480',ar:'FA-2100',cb:'AKX-600'}, tecfil:{o:'PSL160',ar:'ARL5400',cb:'ACP501'}, fram:{o:'PH10060',ar:'CA11809',cb:'CF11002'}, mann:{o:'W712/94',ar:'C3397',cb:'FP25100'} },
+};
+
+// ── LOOKUP ÓLEO ───────────────────────────────────────────
+function buscarOleo(nomeModelo, motor) {
+  const m = nomeModelo.toLowerCase();
+  // encontra chave no db que aparece no nome do modelo
+  const chave = Object.keys(OLEO_DB).find(k => m.includes(k));
+  if (!chave) return null;
+  const db = OLEO_DB[chave];
+  // tenta motor exato, depois por prefixo
+  return db[motor] || db[motor.replace('t','')] || Object.values(db)[0] || null;
+}
+
+function buscarFiltros(nomeModelo) {
+  const m = nomeModelo.toLowerCase();
+  const chave = Object.keys(FILTROS_DB).find(k => m.includes(k));
+  if (!chave) return null;
+  return FILTROS_DB[chave];
+}
+
+// ── CONSULTAR ─────────────────────────────────────────────
+function consultar() {
+  const marcaNome = els.marca.options[els.marca.selectedIndex]?.text;
+  const modeloNome = els.modelo.value.trim();
+  const anoNome = els.ano.options[els.ano.selectedIndex]?.text;
+  const motor = els.motor.value;
+  const filtroMarca = els.marcaFiltro.value;
+
+  if (!els.marca.value || !modeloNome || !els.ano.value || !motor) {
+    alert('Preencha todos os campos para consultar.');
     return;
   }
 
-  const filtros = gerarFiltros(modeloNome);
-  const f = filtros[filtro];
+  const oleo = buscarOleo(modeloNome, motor);
+  const filtros = buscarFiltros(modeloNome);
+  const f = filtros ? filtros[filtroMarca] : null;
 
-  const oleoLitros = {
-    "1.0": "3.0L",
-    "1.4": "3.5L",
-    "1.6": "4.0L",
-    "2.0": "4.5L",
-    "diesel": "6.0L"
+  // defaults por tipo de motor se não encontrado no db
+  const motorDefaults = {
+    'diesel2.0': { v:'5W-30', t:'Sintético Diesel', l:'5,5L', api:'CJ-4', int:'10.000 km' },
+    'diesel2.2': { v:'5W-30', t:'Sintético Diesel', l:'7,0L', api:'CJ-4', int:'10.000 km' },
+    'diesel2.5': { v:'5W-30', t:'Sintético Diesel', l:'7,0L', api:'CJ-4', int:'10.000 km' },
+    'diesel2.8': { v:'5W-30', t:'Sintético Diesel', l:'7,5L', api:'CK-4', int:'10.000 km' },
+    'diesel3.0': { v:'5W-40', t:'Sintético Diesel', l:'10,0L', api:'CK-4', int:'10.000 km' },
+    'diesel4.5': { v:'15W-40', t:'Sintético Diesel', l:'15,0L', api:'CK-4', int:'10.000 km' },
+    '1.0':   { v:'5W-30', t:'Sintético', l:'3,0L', api:'SN', int:'10.000 km' },
+    '1.0t':  { v:'0W-20', t:'Sintético', l:'3,5L', api:'SP', int:'10.000 km' },
+    '1.2t':  { v:'0W-20', t:'Sintético', l:'3,5L', api:'SP', int:'10.000 km' },
+    '1.3t':  { v:'0W-20', t:'Sintético', l:'4,0L', api:'SP', int:'10.000 km' },
+    '1.4':   { v:'5W-30', t:'Sintético', l:'3,5L', api:'SN', int:'10.000 km' },
+    '1.4t':  { v:'5W-30', t:'Sintético', l:'4,0L', api:'SN', int:'10.000 km' },
+    '1.5t':  { v:'0W-20', t:'Sintético', l:'4,0L', api:'SP', int:'10.000 km' },
+    '1.6':   { v:'5W-40', t:'Semissintético', l:'3,5L', api:'SN', int:'7.500 km' },
+    '1.8':   { v:'5W-30', t:'Sintético', l:'3,5L', api:'SN', int:'10.000 km' },
+    '2.0':   { v:'5W-30', t:'Sintético', l:'4,0L', api:'SN', int:'10.000 km' },
+    '2.0t':  { v:'5W-40', t:'Sintético', l:'5,0L', api:'SN', int:'10.000 km' },
+    '2.4':   { v:'5W-30', t:'Sintético', l:'4,5L', api:'SN', int:'10.000 km' },
+    'hibrido1.8': { v:'0W-20', t:'Sintético', l:'4,2L', api:'SN', int:'10.000 km' },
+    'eletrico': { v:'N/A', t:'Elétrico (sem óleo motor)', l:'N/A', api:'N/A', int:'Conforme manual' },
   };
 
-  const litros = oleoLitros[motor] || "-";
+  const spec = oleo || motorDefaults[motor] || { v:'5W-30', t:'Sintético', l:'4,0L', api:'SN', int:'10.000 km' };
+  const fonteTexto = oleo ? '✅ Dados específicos para este modelo' : '⚠️ Dados baseados no tipo de motor (confirme no manual)';
 
-  const imagem = `https://tse1.mm.bing.net/th?q=${marcaNome}+${modeloNome}+${anoNome}+carro+brasil`;
-
-  resultado.innerHTML = `
+  els.resultado.innerHTML = `
   <div class="result-card">
-    <img src="${imagem}">
-    <div class="result-content">
+    <div class="result-header">
       <h3>${marcaNome} ${modeloNome}</h3>
-      <p>Ano: ${anoNome}</p>
-      <p>Motor: ${motor}</p>
-
-      <p>🛢️ Óleo: 5W-30</p>
-      <p>Quantidade: ${litros}</p>
-
-      <hr>
-
-      <p><b>🔧 Filtros (${filtro.toUpperCase()}):</b></p>
-      <p>Óleo: ${f.oleo}</p>
-      <p>Ar: ${f.ar}</p>
-      <p>Combustível: ${f.combustivel}</p>
-      <p>Cabine: ${f.cabine}</p>
-
-      <span class="badge">Troca óleo: 10.000 km</span><br>
-      <span class="badge">Troca filtros: 15.000 km</span>
+      <p>${anoNome} · Motor ${motor.replace('diesel','Diesel ').replace('hibrido','Híbrido ').replace('t',' Turbo')} · ${tipoAtual === 'motos' ? 'Moto' : tipoAtual === 'caminhoes' ? 'Caminhão' : 'Carro'}</p>
     </div>
-  </div>
-  `;
-});
 
-tipo.addEventListener('change', carregarMarcas);
+    <div class="spec-grid">
+      <div class="spec-item">
+        <div class="spec-label">Viscosidade</div>
+        <div class="spec-value">${spec.v}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Tipo</div>
+        <div class="spec-value sm ${spec.t.includes('Diesel')?'amber':''}">${spec.t}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Quantidade</div>
+        <div class="spec-value green">${spec.l}</div>
+      </div>
+      <div class="spec-item">
+        <div class="spec-label">Norma API</div>
+        <div class="spec-value">${spec.api}</div>
+      </div>
+      <div class="spec-item full">
+        <div class="spec-label">Intervalo de troca</div>
+        <div class="spec-value green">${spec.int}</div>
+      </div>
+    </div>
 
+    ${f ? `
+    <div class="filtros-section">
+      <div class="filtros-title">🔧 Filtros ${filtroMarca.charAt(0).toUpperCase()+filtroMarca.slice(1)}</div>
+      <div class="filtro-row"><span>🛢️ Filtro de Óleo</span><span>${f.o}</span></div>
+      <div class="filtro-row"><span>💨 Filtro de Ar</span><span>${f.ar}</span></div>
+      <div class="filtro-row"><span>🌬️ Filtro de Cabine</span><span>${f.cb}</span></div>
+    </div>` : `
+    <div class="filtros-section">
+      <div class="filtros-title">🔧 Filtros</div>
+      <div style="font-size:13px;color:var(--muted);padding:4px 0">Consulte o balconista com o modelo/ano para filtros ${filtroMarca}.</div>
+    </div>`}
+
+    <div class="badges">
+      <span class="badge">🔁 Troca: ${spec.int}</span>
+      <span class="badge green">${spec.t}</span>
+    </div>
+
+    ${spec.obs ? `<div class="obs-box">⚠️ ${spec.obs}</div>` : ''}
+    <div class="obs-box" style="background:rgba(99,115,130,.08);border-color:rgba(99,115,130,.2);color:var(--muted)">${fonteTexto}. Sempre confirme no manual do proprietário.</div>
+  </div>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────
 carregarMarcas();
 </script>
-
 </body>
 </html>
