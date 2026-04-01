@@ -2,158 +2,414 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Tech Lubrificantes</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta Veicular PRO</title>
+
 <style>
-  :root {
-    --bg: #0b0e14;
-    --surface: #131820;
-    --surface2: #1a2130;
-    --border: #1f2d3d;
-    --accent: #f5a623;
-    --accent2: #e8890e;
-    --blue: #2d8bff;
-    --green: #22c97a;
-    --red: #ff4d4d;
-    --text: #eaf0fb;
-    --muted: #7a8fa6;
-    --card: #161e2b;
+body {
+  font-family: Arial;
+  background: #0f172a;
+  color: #fff;
+  margin: 0;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 15px;
+}
+
+h2 {
+  text-align: center;
+}
+
+.card {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: none;
+  background: #0f172a;
+  color: #fff;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(45deg,#2563eb,#3b82f6);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+.relative { position: relative; }
+
+.suggestions {
+  position: absolute;
+  background: #1e293b;
+  max-height: 200px;
+  overflow: auto;
+  width: 100%;
+  display: none;
+  z-index: 1000;
+}
+
+.suggestion-item {
+  padding: 10px;
+  border-bottom: 1px solid #334155;
+}
+
+.suggestion-item:active {
+  background: #2563eb;
+}
+
+.status {
+  text-align: center;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.error { color: #f87171; }
+
+.result-card {
+  margin-top: 15px;
+  background: #1e293b;
+  border-radius: 12px;
+  overflow: hidden;
+  animation: fadeIn 0.4s ease;
+}
+
+.result-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.result-content {
+  padding: 15px;
+}
+
+.result-content h3 {
+  margin: 0 0 10px;
+}
+
+.result-content p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.badge {
+  display: inline-block;
+  background: #2563eb;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(10px); }
+  to { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>🚗 Consulta Veicular PRO</h2>
+
+<div id="status" class="status"></div>
+
+<div class="card">
+
+<select id="tipo">
+  <option value="carros">Carros</option>
+  <option value="motos">Motos</option>
+  <option value="caminhoes">Caminhões</option>
+</select>
+
+<select id="marca"></select>
+
+<div class="relative">
+<input id="modelo" placeholder="Digite o modelo..." disabled>
+<div id="sugestoes" class="suggestions"></div>
+</div>
+
+<select id="ano" disabled></select>
+
+<select id="motor">
+  <option value="">Selecione o motor</option>
+  <option value="1.0">1.0</option>
+  <option value="1.4">1.4</option>
+  <option value="1.6">1.6</option>
+  <option value="2.0">2.0</option>
+  <option value="diesel">Diesel</option>
+</select>
+
+<select id="marcaFiltro">
+  <option value="wega">Wega</option>
+  <option value="tecfil">Tecfil</option>
+  <option value="fram">Fram</option>
+</select>
+
+<button id="btnBuscar">🔍 Consultar</button>
+
+</div>
+
+<div id="resultado"></div>
+
+</div>
+
+<script>
+const tipo = document.getElementById('tipo');
+const marca = document.getElementById('marca');
+const modelo = document.getElementById('modelo');
+const sugestoes = document.getElementById('sugestoes');
+const ano = document.getElementById('ano');
+const status = document.getElementById('status');
+const resultado = document.getElementById('resultado');
+const marcaFiltro = document.getElementById('marcaFiltro');
+const motorEl = document.getElementById('motor');
+
+let modelos = [];
+
+function setStatus(msg, erro=false){
+  status.innerText = msg;
+  status.className = erro ? 'status error' : 'status';
+}
+
+async function fetchComBackup(url1, url2){
+  try{
+    const r1 = await fetch(url1);
+    if(!r1.ok) throw "erro1";
+    return await r1.json();
+  }catch{
+    const r2 = await fetch(url2);
+    if(!r2.ok) throw "erro2";
+    return await r2.json();
+  }
+}
+
+async function carregarMarcas(){
+  setStatus("Carregando marcas...");
+  try{
+    const data = await fetchComBackup(
+      `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas`,
+      `https://brasilapi.com.br/api/fipe/marcas/v1/${tipo.value}`
+    );
+
+    marca.innerHTML = '<option value="">Selecione a marca</option>';
+
+    data.forEach(m=>{
+      marca.add(new Option(m.nome, m.codigo));
+    });
+
+    setStatus("");
+
+  }catch{
+    setStatus("Erro ao carregar marcas", true);
+  }
+}
+
+marca.addEventListener('change', async ()=>{
+  modelo.value='';
+  modelo.disabled=true;
+  sugestoes.style.display='none';
+  ano.innerHTML='';
+  ano.disabled=true;
+
+  if(!marca.value) return;
+
+  setStatus("Carregando modelos...");
+
+  try{
+    const data = await fetchComBackup(
+      `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos`,
+      `https://brasilapi.com.br/api/fipe/veiculos/v1/${tipo.value}/${marca.value}`
+    );
+
+    modelos = data.modelos || data;
+
+    modelo.disabled=false;
+    setStatus("");
+
+  }catch{
+    setStatus("Erro ao carregar modelos", true);
+  }
+});
+
+modelo.addEventListener('input', ()=>{
+  const termo = modelo.value.toLowerCase();
+
+  const lista = modelos.filter(m =>
+    m.nome.toLowerCase().includes(termo)
+  );
+
+  sugestoes.innerHTML='';
+
+  lista.slice(0,10).forEach(m=>{
+    const div=document.createElement('div');
+    div.className='suggestion-item';
+    div.textContent=m.nome;
+
+    div.onclick=async ()=>{
+      modelo.value=m.nome;
+      sugestoes.style.display='none';
+
+      setStatus("Carregando anos...");
+
+      try{
+        const anosData = await fetchComBackup(
+          `https://parallelum.com.br/fipe/api/v1/${tipo.value}/marcas/${marca.value}/modelos/${m.codigo}/anos`,
+          `https://brasilapi.com.br/api/fipe/veiculo/v1/${tipo.value}/${marca.value}/${m.codigo}`
+        );
+
+        const listaAnos = anosData.anos || anosData;
+
+        ano.innerHTML='';
+
+        listaAnos.forEach(a=>{
+          ano.add(new Option(a.nome, a.codigo));
+        });
+
+        ano.disabled=false;
+        setStatus("");
+
+      }catch{
+        setStatus("Erro ao carregar anos", true);
+      }
+    };
+
+    sugestoes.appendChild(div);
+  });
+
+  sugestoes.style.display = lista.length ? 'block' : 'none';
+});
+
+// 🔥 BANCO DE FILTROS EXPANDIDO
+function gerarFiltros(modelo){
+  modelo = modelo.toLowerCase();
+
+  if(modelo.includes("gol")){
+    return {
+      wega:{oleo:"WO-348", ar:"FA-1234", combustivel:"FCI-567", cabine:"AKX-890"},
+      tecfil:{oleo:"PSL55", ar:"ARL4142", combustivel:"FC123", cabine:"ACP123"},
+      fram:{oleo:"PH6607", ar:"CA9997", combustivel:"G5915", cabine:"CF10134"}
+    };
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    min-height: 100vh;
-    max-width: 480px;
-    margin: 0 auto;
-    position: relative;
-    overflow-x: hidden;
+  if(modelo.includes("civic")){
+    return {
+      wega:{oleo:"WO-121", ar:"FA-777", combustivel:"FCI-222", cabine:"AKX-333"},
+      tecfil:{oleo:"PSL147", ar:"ARL4158", combustivel:"FC789", cabine:"ACP456"},
+      fram:{oleo:"PH7317", ar:"CA10242", combustivel:"G7323", cabine:"CF10285"}
+    };
   }
 
-  /* HEADER */
-  .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .logo-icon {
-    width: 38px;
-    height: 38px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-  }
-  .logo-text {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700;
-    font-size: 20px;
-    letter-spacing: 0.5px;
-  }
-  .logo-text span { color: var(--accent); }
-  .header-badge {
-    background: var(--accent);
-    color: #000;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 3px 9px;
-    border-radius: 20px;
-    letter-spacing: 0.5px;
+  if(modelo.includes("corolla")){
+    return {
+      wega:{oleo:"WO-150", ar:"FA-888", combustivel:"FCI-999", cabine:"AKX-444"},
+      tecfil:{oleo:"PSL56", ar:"ARL2208", combustivel:"FC456", cabine:"ACP789"},
+      fram:{oleo:"PH4967", ar:"CA4309", combustivel:"G10147", cabine:"CF9845"}
+    };
   }
 
-  /* TABS */
-  .tabs {
-    display: flex;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 20px;
-    gap: 0;
-  }
-  .tab {
-    flex: 1;
-    padding: 12px 8px;
-    text-align: center;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all .2s;
-    letter-spacing: 0.3px;
-  }
-  .tab.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
-  .tab-icon { font-size: 16px; display: block; margin-bottom: 2px; }
-
-  /* CONTENT */
-  .content { padding: 20px; padding-bottom: 90px; }
-  .page { display: none; }
-  .page.active { display: block; animation: fadeIn .3s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* SECTION TITLE */
-  .section-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .section-title span { color: var(--accent); }
-  .section-sub {
-    color: var(--muted);
-    font-size: 13px;
-    margin-bottom: 20px;
+  if(modelo.includes("onix")){
+    return {
+      wega:{oleo:"WO-351", ar:"FA-1900", combustivel:"FCI-600", cabine:"AKX-111"},
+      tecfil:{oleo:"PSL128", ar:"ARL8822", combustivel:"FC210", cabine:"ACP210"},
+      fram:{oleo:"PH10060", ar:"CA12000", combustivel:"G10500", cabine:"CF11000"}
+    };
   }
 
-  /* SELECT */
-  .form-group { margin-bottom: 14px; }
-  .form-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 6px;
-    display: block;
+  if(modelo.includes("hb20")){
+    return {
+      wega:{oleo:"WO-480", ar:"FA-2020", combustivel:"FCI-777", cabine:"AKX-222"},
+      tecfil:{oleo:"PSL159", ar:"ARL9900", combustivel:"FC300", cabine:"ACP300"},
+      fram:{oleo:"PH10900", ar:"CA13000", combustivel:"G11000", cabine:"CF12000"}
+    };
   }
-  select, input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    padding: 13px 16px;
-    border-radius: 12px;
-    font-size: 15px;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 600;
-    appearance: none;
-    -webkit-appearance: none;
-    transition: border-color .2s;
-    outline: none;
+
+  return {
+    wega:{oleo:"Não encontrado", ar:"Não encontrado", combustivel:"Não encontrado", cabine:"Não encontrado"},
+    tecfil:{oleo:"Não encontrado", ar:"Não encontrado", combustivel:"Não encontrado", cabine:"Não encontrado"},
+    fram:{oleo:"Não encontrado", ar:"Não encontrado", combustivel:"Não encontrado", cabine:"Não encontrado"}
+  };
+}
+
+document.getElementById('btnBuscar').addEventListener('click', ()=>{
+
+  const marcaNome = marca.options[marca.selectedIndex]?.text;
+  const modeloNome = modelo.value;
+  const anoNome = ano.options[ano.selectedIndex]?.text;
+  const filtro = marcaFiltro.value;
+  const motor = motorEl.value;
+
+  if(!marca.value || !modeloNome || !ano.value || !motor){
+    alert("Preencha todos os campos");
+    return;
   }
-  select:focus, input:focus {
-    border-color: var(--accent);
-  }
-  .select-wrapper {
-    position: relative;
-  }
-  .select-wrapper::
+
+  const filtros = gerarFiltros(modeloNome);
+  const f = filtros[filtro];
+
+  const oleoLitros = {
+    "1.0": "3.0L",
+    "1.4": "3.5L",
+    "1.6": "4.0L",
+    "2.0": "4.5L",
+    "diesel": "6.0L"
+  };
+
+  const litros = oleoLitros[motor] || "-";
+
+  const imagem = `https://tse1.mm.bing.net/th?q=${marcaNome}+${modeloNome}+${anoNome}+carro+brasil`;
+
+  resultado.innerHTML = `
+  <div class="result-card">
+    <img src="${imagem}">
+    <div class="result-content">
+      <h3>${marcaNome} ${modeloNome}</h3>
+      <p>Ano: ${anoNome}</p>
+      <p>Motor: ${motor}</p>
+
+      <p>🛢️ Óleo: 5W-30</p>
+      <p>Quantidade: ${litros}</p>
+
+      <hr>
+
+      <p><b>🔧 Filtros (${filtro.toUpperCase()}):</b></p>
+      <p>Óleo: ${f.oleo}</p>
+      <p>Ar: ${f.ar}</p>
+      <p>Combustível: ${f.combustivel}</p>
+      <p>Cabine: ${f.cabine}</p>
+
+      <span class="badge">Troca óleo: 10.000 km</span><br>
+      <span class="badge">Troca filtros: 15.000 km</span>
+    </div>
+  </div>
+  `;
+});
+
+tipo.addEventListener('change', carregarMarcas);
+
+carregarMarcas();
+</script>
+
+</body>
+</html>
